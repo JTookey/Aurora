@@ -1,6 +1,6 @@
 [package]
 name = "aurora"
-version = "0.0.0"
+version = "0.0.1"
 authors = ["James Tooke <j.w.tooke@gmail.com>"]
 edition = "2018"
 
@@ -11,5 +11,111 @@ name = "aurora"
 path = "src/lib.rs"
 
 [dependencies]
+futures = "0.3.8"
+log = "0.4.11"
 wgpu = "0.6.2"
 wgpu_glyph = "0.10.0"
+winit = { version = "0.22.1", features = ["web-sys"] }
+zerocopy = "0.3.0"
+
+[target.'cfg(not(target_arch = "wasm32"))'.dev-dependencies]
+simplelog = "0.8.0"
+
+[target.'cfg(not(target_arch = "wasm32"))'.dependencies]
+subscriber = {package = "wgpu-subscriber", version = "0.1.0" }
+
+[target.'cfg(target_arch = "wasm32")'.dependencies]
+wasm-bindgen = "0.2.62"
+web-sys = { version = "0.3.39", features = [
+    "Document",
+    "Navigator",
+    "Node",
+    "NodeList",
+    "Gpu",
+    "GpuAdapter",
+    "GpuAddressMode",
+    "GpuBindGroup",
+    "GpuBindGroupEntry",
+    "GpuBindGroupDescriptor",
+    "GpuBindGroupLayout",
+    "GpuBindGroupLayoutEntry",
+    "GpuBindGroupLayoutDescriptor",
+    "GpuBlendDescriptor",
+    "GpuBlendFactor",
+    "GpuBlendOperation",
+    "GpuBindingType",
+    "GpuBuffer",
+    "GpuBufferBinding",
+    "GpuBufferCopyView",
+    "GpuBufferDescriptor",
+    "GpuCanvasContext",
+    "GpuColorDict",
+    "GpuColorStateDescriptor",
+    "GpuCommandBuffer",
+    "GpuCommandBufferDescriptor",
+    "GpuCommandEncoder",
+    "GpuCommandEncoderDescriptor",
+    "GpuCompareFunction",
+    "GpuComputePassDescriptor",
+    "GpuComputePassEncoder",
+    "GpuComputePipeline",
+    "GpuComputePipelineDescriptor",
+    "GpuCullMode",
+    "GpuDepthStencilStateDescriptor",
+    "GpuDevice",
+    "GpuDeviceDescriptor",
+    "GpuExtent3dDict",
+    "GpuFilterMode",
+    "GpuFrontFace",
+    "GpuIndexFormat",
+    "GpuInputStepMode",
+    "GpuLimits",
+    "GpuLoadOp",
+    "GpuOrigin3dDict",
+    "GpuPipelineLayout",
+    "GpuPipelineLayoutDescriptor",
+    "GpuPowerPreference",
+    "GpuPrimitiveTopology",
+    "GpuProgrammableStageDescriptor",
+    "GpuQueue",
+    "GpuRasterizationStateDescriptor",
+    "GpuRenderPassColorAttachmentDescriptor",
+    "GpuRenderPassDepthStencilAttachmentDescriptor",
+    "GpuRenderPassDescriptor",
+    "GpuRenderPassEncoder",
+    "GpuRenderPipeline",
+    "GpuRenderPipelineDescriptor",
+    "GpuRequestAdapterOptions",
+    "GpuSampler",
+    "GpuSamplerDescriptor",
+    "GpuShaderModule",
+    "GpuShaderModuleDescriptor",
+    "GpuStencilOperation",
+    "GpuStencilStateFaceDescriptor",
+    "GpuStoreOp",
+    "GpuSwapChain",
+    "GpuSwapChainDescriptor",
+    "GpuTexture",
+    "GpuTextureAspect",
+    "GpuTextureComponentType",
+    "GpuTextureCopyView",
+    "GpuTextureDescriptor",
+    "GpuTextureDimension",
+    "GpuTextureFormat",
+    "GpuTextureViewDescriptor",
+    "GpuTextureViewDimension",
+    "GpuTextureView",
+    "GpuVertexAttributeDescriptor",
+    "GpuVertexBufferLayoutDescriptor",
+    "GpuVertexFormat",
+    "GpuVertexStateDescriptor",
+    "GpuVertexAttributeDescriptor",
+    "HtmlCanvasElement",
+    "Window",
+]}
+js-sys = "0.3.39"
+wasm-bindgen-futures = "0.4.12"
+
+[target.'cfg(target_arch = "wasm32")'.dev-dependencies]
+console_error_panic_hook = "0.1.6"
+console_log = "0.1.2"

@@ -1,3 +1,5 @@
+use wgpu::util::DeviceExt;
+
 struct LinePipeline {
     // Uniform buffers
     // Shared
@@ -13,8 +15,7 @@ struct LinePipeline {
 
     // Depth buffers - specific to each pipeline
     depth_buffer_2d: Texture,
-    depth_buffer_3d: Texture,
-
+    
     // Bind Groups Layouts
     bindgroup_layout: wgpu::BindGroupLayout,
 
@@ -23,4 +24,19 @@ struct LinePipeline {
 
     // Rendering pipelines
     pipeline: wgpu::RenderPipeline,
+}
+
+impl LinePipeline {
+    fn init(
+        sc_desc: &wgpu::SwapChainDescriptor,
+        device: &wgpu::Device
+    ) -> Self {
+
+
+
+
+        Self {
+
+        }
+    }
 }

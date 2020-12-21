@@ -1,14 +1,14 @@
-use zerocopy::AsBytes;
+use bytemuck::{Pod, Zeroable};
 
 #[repr(C)]
-#[derive(AsBytes)]
+#[derive(Clone, Copy, Pod, Zeroable)]
 pub struct SharedUniform {
-    texture_position: [f32; 2],
-    texture_scale: [f32;2],
+    pub texture_position: [f32; 2],
+    pub texture_scale: [f32;2],
 }
 
 #[repr(C)]
-#[derive(AsBytes)]
+#[derive(Clone, Copy, Pod, Zeroable)]
 pub struct CommonUniform {
-    screen_size: [f32;2],
+    pub screen_size: [f32;2],
 }

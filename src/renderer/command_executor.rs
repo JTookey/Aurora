@@ -74,7 +74,7 @@ impl <'frame> CommandExecutor<'frame> {
                         ) {
 
                             // Write instances to the GPU
-                            self.pipeline_manager.update_instance_buffer(
+                            self.pipeline_manager.update_line_instances(
                                 self.queue, 
                                 self.instance_manager.get_line_instances(load_start_id, load_end_id));
 
@@ -95,7 +95,7 @@ impl <'frame> CommandExecutor<'frame> {
                         }
 
                         // Render instances
-                        self.pipeline_manager.render_instances(
+                        self.pipeline_manager.render_lines(
                             self.device, 
                             self.queue, 
                             self.frame,

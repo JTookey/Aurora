@@ -31,7 +31,7 @@ impl PipelineManager {
             usage: wgpu::BufferUsage::UNIFORM | wgpu::BufferUsage::COPY_DST
         });
 
-        // Primative Uniform
+        // Common Uniform
         let common_uniform = CommonUniform{
             screen_size: [sc_desc.width as f32, sc_desc.height as f32],
         };
@@ -57,6 +57,31 @@ impl PipelineManager {
             // Pipelines
             pipeline_lines,
         }
+    }
+
+    // Resize the pipelines
+    pub fn resize(
+        &mut self,
+        device: &wgpu::Device,
+        queue: &wgpu::Queue,
+        sc_desc: &wgpu::SwapChainDescriptor,
+    ) {
+        // Resize the pipelines
+        self.pipeline_lines.resize(
+            device,
+            sc_desc,
+        );
+
+        // Create an updated uniform buffer
+        let common_uniform = CommonUniform{
+            screen_size: [sc_desc.width as f32, sc_desc.height as f32],
+        };
+
+        // Write the uniform
+        queue.write_buffer(
+            &self.common_uniform_buffer, 
+            0, 
+            bytemuck::bytes_of(&common_uniform));
     }
 
     // Update the line instances currently on the GPU

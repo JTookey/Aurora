@@ -115,7 +115,7 @@ fn start<App: BaseApp>(
                 ..
             } => {
                 log::info!("Resizing to {:?}", size);
-                renderer.resize();
+                renderer.resize(size);
             }
 
             // Pass inputs to the App

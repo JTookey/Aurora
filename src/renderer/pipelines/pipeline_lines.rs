@@ -12,6 +12,10 @@ pub struct LinesPipeline {
     instanced_bindgroup_layout: wgpu::BindGroupLayout,
     line_bind_group: wgpu::BindGroup,
 
+    // Shader Modules
+    vs_module_line: wgpu::ShaderModule,
+    fs_module_line: wgpu::ShaderModule,
+
     // Pipeline
     instanced_pipeline_layout: wgpu::PipelineLayout,
     pipeline_line: wgpu::RenderPipeline,
@@ -67,10 +71,31 @@ impl LinesPipeline {
             instanced_bindgroup_layout,
             line_bind_group,
 
+            // Shader Modules
+            vs_module_line,
+            fs_module_line,
+
             // Pipeline
             instanced_pipeline_layout,
             pipeline_line,
         }
+    }
+
+    // Function to resize the pipeline
+    pub fn resize(
+        &mut self, 
+        device: &wgpu::Device,
+        sc_desc: &wgpu::SwapChainDescriptor
+    ) {
+        // Recreate the pipeline
+        self.pipeline_line = create_instanced_pipeline(
+            device, 
+            sc_desc, 
+            &self.instanced_pipeline_layout, 
+            &self.vs_module_line,
+            &self.fs_module_line, 
+            false
+        );
     }
 
     // Update the instances currently on the GPU

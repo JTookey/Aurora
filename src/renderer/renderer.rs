@@ -118,13 +118,21 @@ impl RendererInstance {
         self.frame.take();
     }
 
-    pub fn resize(&mut self) {
+    pub fn resize(&mut self, new_size: winit::dpi::PhysicalSize<u32>) {
+        // Update the physical size
+        self.size = new_size;
+
         // Resize the swap chain
         self.sc_desc.width = if self.size.width == 0 { 1 } else { self.size.width };
         self.sc_desc.height = if self.size.height == 0 { 1 } else { self.size.height };
         self.swap_chain = self.device.create_swap_chain(&self.surface, &self.sc_desc);
 
         // Resize the pipelines (i.e. the depth buffers)
+        self.pipeline_manager.resize(
+            &self.device, 
+            &self.queue, 
+            &self.sc_desc
+        );
     }
 }
 

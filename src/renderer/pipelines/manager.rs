@@ -1,5 +1,3 @@
-use crate::Colour;
-
 use super::{CommonUniform, SharedUniform, LineInstance};
 
 use wgpu::util::DeviceExt;
@@ -55,7 +53,7 @@ impl PipelineManager {
             label: Some("Line Instance Buffer"),
             mapped_at_creation: false,
             size: instance_buffer_line_size,
-            usage: wgpu::BufferUsage::STORAGE | wgpu::BufferUsage::COPY_DST,
+            usage: wgpu::BufferUsage::VERTEX | wgpu::BufferUsage::COPY_DST,
         });
 
         // Create bind group layouts
@@ -143,6 +141,9 @@ impl PipelineManager {
             // Set each of the bind groups
             rpass.set_bind_group(0, &self.line_bind_group, &[]);
 
+            // Set the instances
+            rpass.set_vertex_buffer(0, self.instance_buffer_lines.slice(..));
+
             // Render
             rpass.draw(0..4, start_instance..end_instance);
         }
@@ -184,16 +185,16 @@ fn create_instanced_bindgroup_layout(device: &wgpu::Device) -> wgpu::BindGroupLa
                 },
                 count: None,
             },
-            wgpu::BindGroupLayoutEntry {
-                binding: 1,
-                visibility: wgpu::ShaderStage::VERTEX,
-                ty: wgpu::BindingType::StorageBuffer {
-                    dynamic: false,
-                    readonly: true,
-                    min_binding_size: None,
-                },
-                count: None,
-            }
+            // wgpu::BindGroupLayoutEntry {
+            //     binding: 1,
+            //     visibility: wgpu::ShaderStage::VERTEX,
+            //     ty: wgpu::BindingType::StorageBuffer {
+            //         dynamic: false,
+            //         readonly: true,
+            //         min_binding_size: None,
+            //     },
+            //     count: None,
+            // }
         ],
     })
 }
@@ -216,12 +217,12 @@ fn create_instanced_bindgroup(
                     uniform_buffer.slice(..)
                 ),
             },
-            wgpu::BindGroupEntry {
-                binding: 1,
-                resource: wgpu::BindingResource::Buffer(
-                    instance_buffer.slice(..)
-                ),
-            }
+            // wgpu::BindGroupEntry {
+            //     binding: 1,
+            //     resource: wgpu::BindingResource::Buffer(
+            //         instance_buffer.slice(..)
+            //     ),
+            // }
         ],
     })
 }
@@ -290,7 +291,9 @@ fn create_instanced_pipeline(
         depth_stencil_state: depth_descriptor,
         vertex_state: wgpu::VertexStateDescriptor {
             index_format: wgpu::IndexFormat::Uint16,
-            vertex_buffers: &[],
+            vertex_buffers: &[
+                LineInstance::desc(),
+            ],
         },
         sample_count: 1,
         sample_mask: !0,

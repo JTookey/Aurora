@@ -1,5 +1,4 @@
-use aurora::{
-    run, 
+use aurora::{ 
     BaseApp,
     GeometryManager,
     TextureManager,
@@ -15,17 +14,17 @@ struct Empty {
 // Implement the trait for the main application loop
 impl BaseApp for Empty {
     fn init(
-        geometry_manager: &mut GeometryManager,
-        texture_manger: &mut TextureManager,
+        _geometry_manager: &mut GeometryManager,
+        _texture_manger: &mut TextureManager,
     ) -> Self {
         Self {}
     }
 
-    fn handle_input(&mut self, event: WindowEvent) {
+    fn handle_input(&mut self, _event: WindowEvent) {
 
     }
 
-    fn update(&mut self, delta_t: f32) {
+    fn update(&mut self, _delta_t: f32) {
 
     }
 
@@ -33,7 +32,7 @@ impl BaseApp for Empty {
 
     }
 
-    fn draw<R: Renderer>(&mut self, renderer: &mut R) {
+    fn draw<R: Renderer>(&mut self, _renderer: &mut R) {
 
     }
 }

@@ -1,3 +1,4 @@
+use std::mem;
 use bytemuck::{Pod, Zeroable};
 
 pub struct InstanceManager {
@@ -9,9 +10,9 @@ pub struct InstanceManager {
 impl InstanceManager {
     pub fn new() -> Self {
         Self {
-            line_instances: Vec::new(),
-            primative_instances: Vec::new(),
-            geometry_instances: Vec::new(),
+            line_instances: Vec::with_capacity(super::MAX_INSTANCES),
+            primative_instances: Vec::with_capacity(super::MAX_INSTANCES),
+            geometry_instances: Vec::with_capacity(super::MAX_INSTANCES),
         }
     }
 
@@ -60,6 +61,37 @@ pub struct LineInstance {
     pub position_2: [f32;2],
     pub line_colour: [f32;4],
     pub line_width: f32,
+}
+
+impl <'a> LineInstance {
+    pub fn desc() -> wgpu::VertexBufferDescriptor<'a> {
+        wgpu::VertexBufferDescriptor {
+            step_mode: wgpu::InputStepMode::Instance,
+            stride: mem::size_of::<LineInstance>() as wgpu::BufferAddress,
+            attributes: &[
+                wgpu::VertexAttributeDescriptor {
+                    format: wgpu::VertexFormat::Float2,
+                    offset: 0,
+                    shader_location: 4,
+                },
+                wgpu::VertexAttributeDescriptor {
+                    format: wgpu::VertexFormat::Float2,
+                    offset: mem::size_of::<[f32; 2]>() as wgpu::BufferAddress,
+                    shader_location: 5,
+                },
+                wgpu::VertexAttributeDescriptor {
+                    format: wgpu::VertexFormat::Float4,
+                    offset: mem::size_of::<[f32; 4]>() as wgpu::BufferAddress,
+                    shader_location: 6,
+                },
+                wgpu::VertexAttributeDescriptor {
+                    format: wgpu::VertexFormat::Float,
+                    offset: mem::size_of::<[f32; 8]>() as wgpu::BufferAddress,
+                    shader_location: 7,
+                },
+            ]
+        }
+    }
 }
 
 #[repr(C)]

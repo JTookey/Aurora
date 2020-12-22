@@ -98,7 +98,7 @@ impl <'frame> CommandExecutor<'frame> {
                         self.pipeline_manager.render_instances(
                             self.device, 
                             self.queue, 
-                            self.frame, 
+                            self.frame,
                             *line_instance_start as u32, 
                             *line_instance_end as u32, 
                             load_op,

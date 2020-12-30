@@ -8,6 +8,7 @@ use super::{
     GeometryManager,
     RendererInstance,
     CommandManager,
+    CommandProcessor,
 };
 
 use winit::{
@@ -152,7 +153,11 @@ fn start<App: BaseApp>(
                 renderer.init_new_frame();
 
                 // Request app to draw to frame
-                main_app.draw(&mut command_manager);
+                let mut cp = CommandProcessor::create(
+                    &mut command_manager, 
+                    &mut texture_manager,
+                );
+                main_app.draw(&mut cp);
 
                 // Build and Submit frame to GPU
                 renderer.build_and_submit(&command_manager);

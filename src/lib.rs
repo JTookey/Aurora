@@ -43,4 +43,4 @@ pub use material::TextureManager;
 pub use renderer::{RenderCommand, RendererInstance, LineDescription};
 
 // For internal use
-use renderer::CommandManager;
+use renderer::{CommandManager, CommandProcessor};

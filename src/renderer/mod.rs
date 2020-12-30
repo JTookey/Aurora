@@ -1,5 +1,6 @@
 mod command_executor;
 mod command_manager;
+mod command_processor;
 mod instances;
 mod pipelines;
 mod renderer;
@@ -8,6 +9,7 @@ mod render_commands;
 // public for external use
 pub use renderer::RendererInstance;
 pub use command_manager::CommandManager;
+pub use command_processor::CommandProcessor;
 pub use render_commands::{RenderCommand, LineDescription, TwoDDescription};
 
 // for internal use

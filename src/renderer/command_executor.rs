@@ -1,5 +1,5 @@
 use crate::Colour;
-use super::{CommandManager, InstanceManager, PipelineManager, InternalCommands, MAX_INSTANCES};
+use super::{CommandManager, PipelineManager, InternalCommands, MAX_INSTANCES};
 
 pub struct CommandExecutor<'frame> {
     device: &'frame wgpu::Device,
@@ -7,7 +7,6 @@ pub struct CommandExecutor<'frame> {
     frame: &'frame wgpu::SwapChainFrame,
 
     command_manager: &'frame CommandManager,
-    instance_manager: &'frame InstanceManager,
     pipeline_manager: &'frame mut PipelineManager,
 
     clear_colour: Option<&'frame Colour>,
@@ -22,7 +21,6 @@ impl <'frame> CommandExecutor<'frame> {
         frame: &'frame wgpu::SwapChainFrame,
 
         command_manager: &'frame CommandManager,
-        instance_manager: &'frame InstanceManager,
         pipeline_manager: &'frame mut PipelineManager,
     ) -> Self {
         Self {
@@ -31,7 +29,6 @@ impl <'frame> CommandExecutor<'frame> {
             frame,
 
             command_manager,
-            instance_manager,
             pipeline_manager,
 
             clear_colour: None,
@@ -70,13 +67,13 @@ impl <'frame> CommandExecutor<'frame> {
                         if let Some((start_id, end_id)) = instances_to_load(
                             (load_start_id, load_end_id), 
                             self.instances_on_gpu, 
-                            self.instance_manager.n_line_instances()
+                            self.command_manager.n_line_instances()
                         ) {
 
                             // Write instances to the GPU
                             self.pipeline_manager.update_line_instances(
                                 self.queue, 
-                                self.instance_manager.get_line_instances(load_start_id, load_end_id));
+                                self.command_manager.get_line_instances(load_start_id, load_end_id));
 
                             // Count how many - will end the loop if n_instances_remaining reaches zero
                             n_instances_remaining -= end_id - start_id;

@@ -1,59 +1,6 @@
 use std::mem;
 use bytemuck::{Pod, Zeroable};
 
-pub struct InstanceManager {
-    line_instances: Vec<LineInstance>,
-    primative_instances: Vec<PrimativeInstance>,
-    geometry_instances: Vec<GeometryInstance>,
-}
-
-impl InstanceManager {
-    pub fn new() -> Self {
-        Self {
-            line_instances: Vec::with_capacity(super::MAX_INSTANCES),
-            primative_instances: Vec::with_capacity(super::MAX_INSTANCES),
-            geometry_instances: Vec::with_capacity(super::MAX_INSTANCES),
-        }
-    }
-
-    pub fn push_line_instance(&mut self, line: LineInstance) -> usize {
-        self.line_instances.push(line);
-        self.line_instances.len() - 1
-    }
-
-    pub fn n_line_instances(&self) -> usize {
-        self.line_instances.len()
-    }
-
-    pub fn get_line_instances(&self, start_id: usize, end_id: usize) -> &[LineInstance] {
-        &self.line_instances[start_id..end_id]
-    }
-
-    pub fn push_primative_instance(&mut self, prim: PrimativeInstance) -> usize {
-        self.primative_instances.push(prim);
-        self.primative_instances.len() - 1
-    }
-
-    pub fn n_primative_instances(&self) -> usize {
-        self.primative_instances.len()
-    }
-
-    pub fn push_geometry_instance(&mut self, geom: GeometryInstance) -> usize {
-        self.geometry_instances.push(geom);
-        self.geometry_instances.len() - 1
-    }
-
-    pub fn n_geometry_instances(&self) -> usize {
-        self.geometry_instances.len()
-    }
-
-    pub fn clear(&mut self) {
-        self.line_instances.clear();
-        self.primative_instances.clear();
-        self.geometry_instances.clear();
-    }
-}
-
 #[repr(C)]
 #[derive(Debug, Clone, Copy, Pod, Zeroable)]
 pub struct LineInstance {
@@ -96,12 +43,76 @@ impl <'a> LineInstance {
 
 #[repr(C)]
 #[derive(Clone, Copy, Pod, Zeroable)]
-pub struct PrimativeInstance {
+pub struct TwoDInstance {
+    pub position: [f32;2],      // 8
+    pub size: [f32;2],          // 8
+    pub colour: [f32;4],        // 16
+    pub texture: [f32;4],       // 16 TL & BR
+    pub texture_opacity: f32,   // 4
+    pub line_width: f32,        // 4
+    pub corner_radius: f32,     // 4
+    pub rotation: f32,          // 4
+    pub shape: u32,             // 4
+}
 
+impl <'a> TwoDInstance {
+    pub fn desc() -> wgpu::VertexBufferDescriptor<'a> {
+        wgpu::VertexBufferDescriptor {
+            step_mode: wgpu::InputStepMode::Instance,
+            stride: mem::size_of::<TwoDInstance>() as wgpu::BufferAddress,
+            attributes: &[
+                wgpu::VertexAttributeDescriptor {
+                    format: wgpu::VertexFormat::Float2,
+                    offset: 0,
+                    shader_location: 4,
+                },
+                wgpu::VertexAttributeDescriptor {
+                    format: wgpu::VertexFormat::Float2,
+                    offset: mem::size_of::<[f32; 2]>() as wgpu::BufferAddress,
+                    shader_location: 5,
+                },
+                wgpu::VertexAttributeDescriptor {
+                    format: wgpu::VertexFormat::Float4,
+                    offset: mem::size_of::<[f32; 4]>() as wgpu::BufferAddress,
+                    shader_location: 6,
+                },
+                wgpu::VertexAttributeDescriptor {
+                    format: wgpu::VertexFormat::Float4,
+                    offset: mem::size_of::<[f32; 8]>() as wgpu::BufferAddress,
+                    shader_location: 7,
+                },
+                wgpu::VertexAttributeDescriptor {
+                    format: wgpu::VertexFormat::Float,
+                    offset: mem::size_of::<[f32; 12]>() as wgpu::BufferAddress,
+                    shader_location: 8,
+                },
+                wgpu::VertexAttributeDescriptor {
+                    format: wgpu::VertexFormat::Float,
+                    offset: mem::size_of::<[f32; 13]>() as wgpu::BufferAddress,
+                    shader_location: 9,
+                },
+                wgpu::VertexAttributeDescriptor {
+                    format: wgpu::VertexFormat::Float,
+                    offset: mem::size_of::<[f32; 14]>() as wgpu::BufferAddress,
+                    shader_location: 10,
+                },
+                wgpu::VertexAttributeDescriptor {
+                    format: wgpu::VertexFormat::Float,
+                    offset: mem::size_of::<[f32; 15]>() as wgpu::BufferAddress,
+                    shader_location: 11,
+                },
+                wgpu::VertexAttributeDescriptor {
+                    format: wgpu::VertexFormat::Uint,
+                    offset: mem::size_of::<[f32; 16]>() as wgpu::BufferAddress,
+                    shader_location: 12,
+                },
+            ]
+        }
+    }
 }
 
 #[repr(C)]
 #[derive(Clone, Copy, Pod, Zeroable)]
-pub struct GeometryInstance {
+pub struct ThreeDInstance {
 
 }

@@ -1,10 +1,10 @@
 use super::{
     CommandExecutor,
     CommandManager,
-    InstanceManager,
     PipelineManager,
     Renderer,
     RenderCommand,
+    TextureManager,
 };
 
 pub struct RendererInstance {
@@ -20,8 +20,6 @@ pub struct RendererInstance {
 
     frame: Option<wgpu::SwapChainFrame>,
 
-    command_manager: CommandManager,
-    instance_manager: InstanceManager,
     pipeline_manager: PipelineManager,
 }
 
@@ -32,7 +30,7 @@ impl RendererInstance {
         surface: wgpu::Surface,
         adapter: wgpu::Adapter,
         device: wgpu::Device,
-        queue: wgpu::Queue
+        queue: wgpu::Queue,
     ) -> Self {
         // Create the Swap Chain Descriptor
         let sc_desc = wgpu::SwapChainDescriptor {
@@ -51,12 +49,6 @@ impl RendererInstance {
         // Create the actual Swap Chain
         let swap_chain = device.create_swap_chain(&surface, &sc_desc);
 
-        // Create the Command Manager
-        let command_manager = CommandManager::new();
-
-        // Create Instance Manager
-        let instance_manager = InstanceManager::new();
-
         // Create Pipeline Manager
         let pipeline_manager = PipelineManager::new(&device, &sc_desc);
 
@@ -71,17 +63,11 @@ impl RendererInstance {
             sc_desc,
             swap_chain,
             frame: None,
-            command_manager,
-            instance_manager,
             pipeline_manager,
         }
     }
 
     pub fn init_new_frame(&mut self) {
-        // Clear out all previous cmds
-        self.command_manager.clear();
-        self.instance_manager.clear();
-
         // Attempt to aquire a new frame
         let frame = match self.swap_chain.get_current_frame() {
             Ok(frame) => frame,
@@ -97,7 +83,7 @@ impl RendererInstance {
         self.frame = Some(frame);
     }
 
-    pub fn build_and_submit(&mut self) {
+    pub fn build_and_submit(&mut self, command_manager: &CommandManager) {
         // Render on the GPU
         if let Some(frame) = &self.frame {
             
@@ -106,8 +92,7 @@ impl RendererInstance {
                 &self.device,
                 &self.queue, 
                 frame, 
-                &self.command_manager, 
-                &self.instance_manager, 
+                command_manager,
                 &mut self.pipeline_manager);
 
             // Run
@@ -133,11 +118,5 @@ impl RendererInstance {
             &self.queue, 
             &self.sc_desc
         );
-    }
-}
-
-impl Renderer for RendererInstance {
-    fn add(&mut self, cmd: RenderCommand) {
-        self.command_manager.process_cmd(cmd, &mut self.instance_manager);
     }
 }

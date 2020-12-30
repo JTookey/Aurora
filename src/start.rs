@@ -7,6 +7,7 @@ use super::{
     TextureManager,
     GeometryManager,
     RendererInstance,
+    CommandManager,
 };
 
 use winit::{
@@ -51,8 +52,10 @@ fn start<App: BaseApp>(
     };
 
     log::info!("Initializing the application...");
-    let mut texture_manger = TextureManager::new();
+    let mut texture_manager = TextureManager::new();
     let mut geometry_manager = GeometryManager::new();
+
+    let mut command_manager = CommandManager::new();
 
     let mut renderer = RendererInstance::new(
         instance,
@@ -63,7 +66,7 @@ fn start<App: BaseApp>(
         queue,
     );
 
-    let mut main_app = App::init(&mut geometry_manager, &mut texture_manger);
+    let mut main_app = App::init(&mut geometry_manager, &mut texture_manager);
 
     log::info!("Creating timer...");
     #[cfg(not(target_arch = "wasm32"))]
@@ -72,7 +75,7 @@ fn start<App: BaseApp>(
 
     log::info!("Entering render loop...");
     event_loop.run(move |event, _, control_flow| {
-        let _ = &renderer; // force ownership by the closure
+        let _ = (&command_manager, &renderer); // force ownership by the closure
 
         // Set the control flow type based on the target
         *control_flow = if cfg!(feature = "metal-auto-capture") {
@@ -145,13 +148,14 @@ fn start<App: BaseApp>(
                 main_app.update( delta_t.as_secs_f32() );
 
                 // Start a new frame
+                command_manager.clear();
                 renderer.init_new_frame();
 
                 // Request app to draw to frame
-                main_app.draw(&mut renderer);
+                main_app.draw(&mut command_manager);
 
                 // Build and Submit frame to GPU
-                renderer.build_and_submit();
+                renderer.build_and_submit(&command_manager);
             }
             _ => {}
         }

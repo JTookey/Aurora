@@ -1,4 +1,4 @@
-use super::{CommonUniform, SharedUniform, LineInstance, LinesPipeline};
+use super::{CommonUniform, SharedUniform, LineInstance, LinesPipeline, TwoDInstance, TwoDPipeline};
 
 use wgpu::util::DeviceExt;
 pub const MAX_INSTANCES: usize = 500;
@@ -11,6 +11,7 @@ pub struct PipelineManager {
 
     // Pipeline
     pipeline_lines: LinesPipeline,
+    pipeline_2d: TwoDPipeline,
 }
 
 impl PipelineManager {
@@ -49,6 +50,12 @@ impl PipelineManager {
             &common_uniform_buffer
         );
 
+        let pipeline_2d = TwoDPipeline::new(
+            device, 
+            sc_desc, 
+            &common_uniform_buffer
+        );
+
         Self {
             // Buffers
             shared_uniform_buffer,
@@ -56,6 +63,7 @@ impl PipelineManager {
 
             // Pipelines
             pipeline_lines,
+            pipeline_2d,
         }
     }
 

@@ -81,21 +81,31 @@ impl <'frame> CommandProcessor<'frame> {
                     line_width: desc.line_width,   
                     corner_radius: desc.corner_radius,
                     rotation: desc.rotation,     
-                    shape: desc.shape as u32,    
+                    shape: 1,    
                 };
 
                 // Push new instance
                 let two_d_index = self.command_manager.push_two_d_instance(instance);
 
+                let mut new_cmd_needed = false;
+
                 // Check if can be batched with last command
-                if let Some(InternalCommands::DrawTwoDBatch{instance_end, ..}) = self.command_manager.last_mut() {
-                    *instance_end += 1;
+                if let Some(InternalCommands::DrawTwoDBatch{instance_end, texture, ..}) = self.command_manager.last_mut() {
+                    if *texture == desc.texture {
+                        *instance_end += 1;
+                    } else {
+                        new_cmd_needed = true;
+                    }
+                } else {
+                    new_cmd_needed = true;
+                }
 
                 // If not then create a new batch command
-                } else {
+                if new_cmd_needed {
                     let new_2d_batch = InternalCommands::DrawTwoDBatch {
                         instance_start: two_d_index,
                         instance_end: two_d_index + 1,
+                        texture: desc.texture,
                     };
 
                     self.command_manager.push_command(new_2d_batch);

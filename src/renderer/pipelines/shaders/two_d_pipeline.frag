@@ -3,7 +3,7 @@
 layout(location = 0) in vec2 uv;
 layout(location = 1) in float aspect_ratio;
 
-layout(location = 2) in flat uint f_prim_type;
+layout(location = 2) in flat uint f_shape;
 layout(location = 3) in float f_corner_radius;
 layout(location = 4) in vec4 f_col;
 
@@ -36,16 +36,16 @@ void main() {
     float d = 1.0;
     
     // Calc for different prim types
-    if (f_prim_type == 1) {
+    if (f_shape == 1) {
         d = udRoundRect(uv, f_corner_radius);
         d = asFilled(d);
-    } else if (f_prim_type == 2) {
+    } else if (f_shape == 2) {
         d = sdCircle(uv, 1.0);
         d = asFilled(d);
-    } else if (f_prim_type == 3) {
+    } else if (f_shape == 3) {
         d = sdTri(uv, 1.0);
         d = asFilled(d);
-    } else if (f_prim_type == 4) {
+    } else if (f_shape == 4) {
         d = sdHex(uv, vec2(1.0));
         d = asFilled(d);
     }

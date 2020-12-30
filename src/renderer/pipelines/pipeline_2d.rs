@@ -1,3 +1,5 @@
+use crate::{Texture, Vector2};
+
 use super::{
     MAX_INSTANCES,
     CommonUniform, TwoDInstance,
@@ -8,8 +10,11 @@ pub struct TwoDPipeline {
     // Buffers
     pub instance_buffer_2d: wgpu::Buffer,
 
+    // Bound texture
+    pipeline_texture: Texture,
+
     // Bind Groups
-    instanced_bindgroup_layout: wgpu::BindGroupLayout,
+    two_d_bind_group_layout: wgpu::BindGroupLayout,
     two_d_bind_group: wgpu::BindGroup,
 
     // Shader Modules
@@ -17,7 +22,7 @@ pub struct TwoDPipeline {
     fs_module_2d: wgpu::ShaderModule,
 
     // Pipeline
-    instanced_pipeline_layout: wgpu::PipelineLayout,
+    two_d_pipeline_layout: wgpu::PipelineLayout,
     pipeline_2d: wgpu::RenderPipeline,
 }
 
@@ -37,38 +42,43 @@ impl TwoDPipeline {
             usage: wgpu::BufferUsage::VERTEX | wgpu::BufferUsage::COPY_DST,
         });
 
+        // Create Initial Pipeline Texture
+        let pipeline_texture = Texture::new(device, 256, 256);
+
         // Create bind group layouts
-        let instanced_bindgroup_layout = create_instanced_bindgroup_layout(device);
+        let two_d_bind_group_layout = create_main_bind_group_layout(device);
 
         // Create the actual bindgroups
-        let two_d_bind_group = create_instanced_bindgroup(
+        let two_d_bind_group = create_main_bind_group(
             device, 
-            &instanced_bindgroup_layout,
+            &two_d_bind_group_layout,
             common_uniform_buffer,
-            std::mem::size_of::<CommonUniform>() as wgpu::BufferAddress,
-            &instance_buffer_2d,
-            instance_buffer_2d_size);
+            &pipeline_texture,
+        );
 
         // Create Pipeline layout
-        let instanced_pipeline_layout = device.create_pipeline_layout(&wgpu::PipelineLayoutDescriptor {
-            label: Some("Instanced Pipeline Layout"),
+        let two_d_pipeline_layout = device.create_pipeline_layout(&wgpu::PipelineLayoutDescriptor {
+            label: Some("2D Pipeline Layout"),
             push_constant_ranges: &[],
-            bind_group_layouts: &[&instanced_bindgroup_layout],
+            bind_group_layouts: &[&two_d_bind_group_layout],
         });
 
         // Import shaders
-        let vs_module_2d = device.create_shader_module(wgpu::include_spirv!("shaders/lines_Vertex.spirv"));
-        let fs_module_2d = device.create_shader_module(wgpu::include_spirv!("shaders/lines_Fragment.spirv"));
+        let vs_module_2d = device.create_shader_module(wgpu::include_spirv!("shaders/two_d_pipeline_Vertex.spirv"));
+        let fs_module_2d = device.create_shader_module(wgpu::include_spirv!("shaders/two_d_pipeline_Fragment.spirv"));
 
         // Create pipeline
-        let pipeline_2d = create_instanced_pipeline(device, sc_desc, &instanced_pipeline_layout, &vs_module_2d, &fs_module_2d, false);
+        let pipeline_2d = create_instanced_pipeline(device, sc_desc, &two_d_pipeline_layout, &vs_module_2d, &fs_module_2d, false);
 
         Self {
             // Buffers
             instance_buffer_2d,
 
+            // Texture
+            pipeline_texture,
+
             // Bind Groups
-            instanced_bindgroup_layout,
+            two_d_bind_group_layout,
             two_d_bind_group,
 
             // Shader Modules
@@ -76,7 +86,7 @@ impl TwoDPipeline {
             fs_module_2d,
 
             // Pipeline
-            instanced_pipeline_layout,
+            two_d_pipeline_layout,
             pipeline_2d,
         }
     }
@@ -91,11 +101,25 @@ impl TwoDPipeline {
         self.pipeline_2d = create_instanced_pipeline(
             device, 
             sc_desc, 
-            &self.instanced_pipeline_layout, 
+            &self.two_d_pipeline_layout, 
             &self.vs_module_2d,
             &self.fs_module_2d,
             false
         );
+    }
+
+    // Prepare the buffers
+    pub fn prepare_buffers(
+        &mut self,
+        device: &wgpu::Device,
+        common_uniform_buffer: &wgpu::Buffer,
+        buffer_dimensions_required: Vector2,
+    ) {
+        let (width, height) = self.pipeline_texture.get_size();
+        if buffer_dimensions_required.x > width as f32 || buffer_dimensions_required.y > height as f32 {
+            self.pipeline_texture = Texture::new(device, buffer_dimensions_required.x as u32, buffer_dimensions_required.y as u32);
+            self.two_d_bind_group = create_main_bind_group(device, &self.two_d_bind_group_layout, common_uniform_buffer, &self.pipeline_texture);
+        }
     }
 
     // Update the instances currently on the GPU
@@ -118,6 +142,7 @@ impl TwoDPipeline {
         frame: &wgpu::SwapChainFrame,
         start_instance: u32,
         end_instance: u32,
+        texture: Option<&Texture>,
         load_op: wgpu::LoadOp<wgpu::Color>,
     ) {
 
@@ -125,6 +150,30 @@ impl TwoDPipeline {
         let mut encoder = device.create_command_encoder(&wgpu::CommandEncoderDescriptor{
             label: Some("Instanced Line Command Encoder"),
         });
+
+        // Copy texture to bound resources
+        if let Some(tex) = texture {
+            encoder.copy_texture_to_texture(
+                wgpu::TextureCopyView {
+                    texture: tex.get_texture_buffer(),
+                    mip_level: 0,
+                    origin: wgpu::Origin3d {
+                        x: 0,
+                        y: 0,
+                        z: 0,
+                    },
+                },
+                wgpu::TextureCopyView {
+                    texture: self.pipeline_texture.get_texture_buffer(),
+                    mip_level: 0,
+                    origin: wgpu::Origin3d {
+                        x: 0,
+                        y: 0,
+                        z: 0,
+                    },
+                }, 
+                tex.get_extent());
+        }
 
         // Create a render pass
         {

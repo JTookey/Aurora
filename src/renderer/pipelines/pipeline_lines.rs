@@ -38,16 +38,14 @@ impl LinesPipeline {
         });
 
         // Create bind group layouts
-        let instanced_bindgroup_layout = create_instanced_bindgroup_layout(device);
+        let instanced_bindgroup_layout = create_instanced_bind_group_layout(device);
 
         // Create the actual bindgroups
-        let line_bind_group = create_instanced_bindgroup(
+        let line_bind_group = create_instanced_bind_group(
             device, 
             &instanced_bindgroup_layout,
-            common_uniform_buffer,
-            std::mem::size_of::<CommonUniform>() as wgpu::BufferAddress,
-            &instance_buffer_lines,
-            instance_buffer_line_size);
+            common_uniform_buffer
+        );
 
         // Create Pipeline layout
         let instanced_pipeline_layout = device.create_pipeline_layout(&wgpu::PipelineLayoutDescriptor {

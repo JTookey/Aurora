@@ -11,18 +11,6 @@ layout(location = 5) in vec2 position_2;
 layout(location = 6) in vec4 line_colour;
 layout(location = 7) in float line_width;
 
-// struct Line {
-//     vec2 position_1;        // 8
-//     vec2 position_2;        // 8
-//     vec4 line_colour;       // 16
-//     float line_width;       // 4
-// };
-
-// layout(std430, set = 0, binding = 1) 
-// buffer Instances {
-//     Line lines[];
-// };
-
 void main() {
 
     // Pass straight through

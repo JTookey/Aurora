@@ -1,5 +1,5 @@
 use crate::Colour;
-use super::{CommandManager, PipelineManager, InternalCommands, MAX_INSTANCES};
+use super::{CommandManager, PipelineManager, TextureManager, InternalCommands, MAX_INSTANCES};
 
 pub struct CommandExecutor<'frame> {
     device: &'frame wgpu::Device,
@@ -8,10 +8,13 @@ pub struct CommandExecutor<'frame> {
 
     command_manager: &'frame CommandManager,
     pipeline_manager: &'frame mut PipelineManager,
+    texture_manager: &'frame TextureManager,
 
     clear_colour: Option<&'frame Colour>,
 
-    instances_on_gpu: Option<(usize, usize)>,
+    line_instances_on_gpu: Option<(usize, usize)>,
+    two_d_instances_on_gpu: Option<(usize, usize)>,
+    three_d_instances_on_gpu: Option<(usize, usize)>,
 }
 
 impl <'frame> CommandExecutor<'frame> {
@@ -22,6 +25,7 @@ impl <'frame> CommandExecutor<'frame> {
 
         command_manager: &'frame CommandManager,
         pipeline_manager: &'frame mut PipelineManager,
+        texture_manager: &'frame TextureManager,
     ) -> Self {
         Self {
             device,
@@ -30,14 +34,24 @@ impl <'frame> CommandExecutor<'frame> {
 
             command_manager,
             pipeline_manager,
+            texture_manager,
 
             clear_colour: None,
 
-            instances_on_gpu: None,
+            line_instances_on_gpu: None,
+            two_d_instances_on_gpu: None,
+            three_d_instances_on_gpu: None,
         }   
     }
 
     pub fn build_frame(&mut self) {
+        // First check if buffers need preparing
+        self.pipeline_manager.prepare_buffers(
+            self.device, 
+            self.texture_manager.buffer_dimensions_required(),
+        );
+
+        // Loop through commands
         for cmd in self.command_manager.commands() {
 
             // Change the load opp depending on if a clear colour has been set
@@ -66,7 +80,7 @@ impl <'frame> CommandExecutor<'frame> {
                     while n_instances_remaining > 0 {
                         if let Some((start_id, end_id)) = instances_to_load(
                             (load_start_id, load_end_id), 
-                            self.instances_on_gpu, 
+                            self.line_instances_on_gpu, 
                             self.command_manager.n_line_instances()
                         ) {
 
@@ -84,7 +98,7 @@ impl <'frame> CommandExecutor<'frame> {
                             }
 
                             // Update the records
-                            self.instances_on_gpu = Some((start_id, end_id));
+                            self.line_instances_on_gpu = Some((start_id, end_id));
 
                         } else {
                             // Everything required already on GPU - cancel the loop
@@ -98,6 +112,57 @@ impl <'frame> CommandExecutor<'frame> {
                             self.frame,
                             *line_instance_start as u32, 
                             *line_instance_end as u32, 
+                            load_op,
+                        );
+                    }
+                },
+
+                InternalCommands::DrawTwoDBatch{instance_start, instance_end, texture} => {
+                    // Create local variables
+                    let mut load_start_id = *instance_start;
+                    let load_end_id = *instance_end;
+                    
+                    // Count the number of instances that require rendereing
+                    let mut n_instances_remaining = instance_end - instance_start;
+
+                    // Not all might fit in a single render pass due to limits on buffer size and therefore
+                    // number of instances that can be rendered... so we will loop.
+                    while n_instances_remaining > 0 {
+                        if let Some((start_id, end_id)) = instances_to_load(
+                            (load_start_id, load_end_id), 
+                            self.two_d_instances_on_gpu, 
+                            self.command_manager.n_two_d_instance()
+                        ) {
+
+                            // Write instances to the GPU
+                            self.pipeline_manager.update_two_d_instances(
+                                self.queue, 
+                                self.command_manager.get_two_d_instances(load_start_id, load_end_id));
+
+                            // Count how many - will end the loop if n_instances_remaining reaches zero
+                            n_instances_remaining -= end_id - start_id;
+                            
+                            // Prep for next loop if required
+                            if n_instances_remaining != 0 {
+                                load_start_id = end_id + 1;
+                            }
+
+                            // Update the records
+                            self.two_d_instances_on_gpu = Some((start_id, end_id));
+
+                        } else {
+                            // Everything required already on GPU - cancel the loop
+                            n_instances_remaining = 0;
+                        }
+
+                        // Render instances
+                        self.pipeline_manager.render_2d(
+                            self.device, 
+                            self.queue, 
+                            self.frame,
+                            *instance_start as u32, 
+                            *instance_end as u32,
+                            None,
                             load_op,
                         );
                     }

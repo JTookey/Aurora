@@ -1,4 +1,4 @@
-use crate::Colour;
+use crate::{Colour, TextureHandle};
 
 use super::{Renderer, RenderCommand, LineInstance, TwoDInstance, ThreeDInstance};
 
@@ -14,6 +14,7 @@ pub enum InternalCommands {
     DrawTwoDBatch{
         instance_start: usize,
         instance_end: usize,
+        texture: TextureHandle,
     },
     None,
 }
@@ -78,7 +79,7 @@ impl CommandManager {
         self.two_d_instance.len()
     }
 
-    pub fn get_two_d_instance(&self, start_id: usize, end_id: usize) -> &[TwoDInstance] {
+    pub fn get_two_d_instances(&self, start_id: usize, end_id: usize) -> &[TwoDInstance] {
         &self.two_d_instance[start_id..end_id]
     }
 

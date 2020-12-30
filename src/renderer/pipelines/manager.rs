@@ -1,4 +1,5 @@
-use super::{CommonUniform, SharedUniform, LineInstance, LinesPipeline, TwoDInstance, TwoDPipeline};
+use crate::Vector2;
+use super::{CommonUniform, SharedUniform, LineInstance, LinesPipeline, TwoDInstance, TwoDPipeline, Texture};
 
 use wgpu::util::DeviceExt;
 pub const MAX_INSTANCES: usize = 500;
@@ -79,6 +80,10 @@ impl PipelineManager {
             device,
             sc_desc,
         );
+        self.pipeline_2d.resize(
+            device,
+            sc_desc,
+        );
 
         // Create an updated uniform buffer
         let common_uniform = CommonUniform{
@@ -91,6 +96,19 @@ impl PipelineManager {
             0, 
             bytemuck::bytes_of(&common_uniform));
     }
+    
+    // Prepare the buffers
+    pub fn prepare_buffers(
+        &mut self,
+        device: &wgpu::Device,
+        buffer_dimensions_required: Vector2,
+    ) {
+        self.pipeline_2d.prepare_buffers(
+            device,
+            &self.common_uniform_buffer,
+            buffer_dimensions_required,
+        );
+    }
 
     // Update the line instances currently on the GPU
     pub fn update_line_instances(
@@ -99,6 +117,18 @@ impl PipelineManager {
         instances: &[LineInstance],
     ) {
         self.pipeline_lines.update_instance_buffer(
+            queue,
+            instances,
+        )
+    }
+
+    // Update the line instances currently on the GPU
+    pub fn update_two_d_instances(
+        &self,
+        queue: &wgpu::Queue,
+        instances: &[TwoDInstance],
+    ) {
+        self.pipeline_2d.update_instance_buffer(
             queue,
             instances,
         )
@@ -120,6 +150,28 @@ impl PipelineManager {
             frame,
             start_instance,
             end_instance,
+            load_op,
+        );
+    }
+
+    // Method for rendering 2D objects - pass on the command to the 2D Pipeline
+    pub fn render_2d(
+        &mut self,
+        device: &wgpu::Device,
+        queue: &wgpu::Queue,
+        frame: &wgpu::SwapChainFrame,
+        start_instance: u32,
+        end_instance: u32,
+        texture: Option<&Texture>,
+        load_op: wgpu::LoadOp<wgpu::Color>,
+    ) {
+        self.pipeline_2d.render_instances(
+            device,
+            queue,
+            frame,
+            start_instance,
+            end_instance,
+            texture,
             load_op,
         );
     }

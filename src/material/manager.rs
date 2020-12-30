@@ -1,5 +1,7 @@
 use std::collections::HashMap;
 
+use crate::Vector2;
+
 use super::{
     AssetHolder, 
     InternalHandle, 
@@ -21,6 +23,7 @@ pub struct TextureManager {
     next_texture_handle: TextureHandle,
     needs_loading: Vec<TextureHandle>,
     needs_preparing: bool,
+    max_texture_size: Vector2,
 }
 
 impl TextureManager {
@@ -32,10 +35,19 @@ impl TextureManager {
             next_texture_handle: 0,
             needs_loading: Vec::new(),
             needs_preparing: false,
+            max_texture_size: Vector2::new(256.0, 256.0),
         }
     }
 
+    pub fn buffer_dimensions_required(&self) -> Vector2 {
+        self.max_texture_size
+    }
+
     pub fn create_texture_from_data(&mut self, raw_data: Vec<u8>, width: u32, height: u32) -> TextureHandle {
+        // Ensure biggest texture dimentions captured
+        self.max_texture_size.x = self.max_texture_size.x.max(width as f32);
+        self.max_texture_size.y = self.max_texture_size.y.max(height as f32);
+
         let holder = AssetHolder::Unprepared( RawTextureData{
             width,
             height,
@@ -43,7 +55,7 @@ impl TextureManager {
         });
         let i_handle = self.next_internal_handle;
         self.textures.insert(i_handle, holder);
-        self.needs_loading.push(self.next_texture_handle);
+        self.needs_loading.push(i_handle);
         self.next_internal_handle += 1;
         self.needs_preparing = true;
 
@@ -57,23 +69,7 @@ impl TextureManager {
 
     pub fn create_texture_from_file(&mut self, filename: &str) -> TextureHandle {
         let (raw_data, width, height) = load_from_file(filename);
-        let holder = AssetHolder::Unprepared(RawTextureData {
-            width,
-            height,
-            data: raw_data,
-        });
-        let i_handle = self.next_internal_handle;
-        self.textures.insert(i_handle, holder);
-        self.needs_loading.push(i_handle);
-        self.next_internal_handle += 1;
-        self.needs_preparing = true;
-        
-        let sub_texture = SubTexture {
-            texture: i_handle,
-            texture_position: [0, 0],
-            texture_size: [width, height],
-        };
-        self.add_sub_texture(sub_texture)
+        self.create_texture_from_data(raw_data, width, height)
     }
 
     pub fn create_sub_texture(&mut self, texture: TextureHandle, pos_x: u32, pos_y: u32, width: u32, height: u32) -> TextureHandle {

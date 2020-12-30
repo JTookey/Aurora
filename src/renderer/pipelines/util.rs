@@ -1,4 +1,4 @@
-use super::LineInstance;
+use super::{LineInstance, Texture};
 
 pub fn create_render_pass<'frame>(
     encoder: &'frame mut wgpu::CommandEncoder, 
@@ -19,7 +19,7 @@ pub fn create_render_pass<'frame>(
     })
 }
 
-pub fn create_instanced_bindgroup_layout(device: &wgpu::Device) -> wgpu::BindGroupLayout {
+pub fn create_instanced_bind_group_layout(device: &wgpu::Device) -> wgpu::BindGroupLayout {
     device.create_bind_group_layout(&wgpu::BindGroupLayoutDescriptor {
         label: None,
         entries: &[
@@ -32,27 +32,14 @@ pub fn create_instanced_bindgroup_layout(device: &wgpu::Device) -> wgpu::BindGro
                 },
                 count: None,
             },
-            // wgpu::BindGroupLayoutEntry {
-            //     binding: 1,
-            //     visibility: wgpu::ShaderStage::VERTEX,
-            //     ty: wgpu::BindingType::StorageBuffer {
-            //         dynamic: false,
-            //         readonly: true,
-            //         min_binding_size: None,
-            //     },
-            //     count: None,
-            // }
         ],
     })
 }
 
-pub fn create_instanced_bindgroup(
+pub fn create_instanced_bind_group(
     device: &wgpu::Device,
     uniform_bind_group_layout: &wgpu::BindGroupLayout,
     uniform_buffer: &wgpu::Buffer,
-    uniform_size: wgpu::BufferAddress,
-    instance_buffer: &wgpu::Buffer, 
-    buffer_size: wgpu::BufferAddress
 ) -> wgpu::BindGroup {
     device.create_bind_group(&wgpu::BindGroupDescriptor {
         label: None,
@@ -64,12 +51,6 @@ pub fn create_instanced_bindgroup(
                     uniform_buffer.slice(..)
                 ),
             },
-            // wgpu::BindGroupEntry {
-            //     binding: 1,
-            //     resource: wgpu::BindingResource::Buffer(
-            //         instance_buffer.slice(..)
-            //     ),
-            // }
         ],
     })
 }
@@ -145,5 +126,68 @@ pub fn create_instanced_pipeline(
         sample_count: 1,
         sample_mask: !0,
         alpha_to_coverage_enabled: false,
+    })
+}
+
+pub fn create_main_bind_group_layout(device: &wgpu::Device) -> wgpu::BindGroupLayout {
+    device.create_bind_group_layout(&wgpu::BindGroupLayoutDescriptor {
+        label: None,
+        entries: &[
+            wgpu::BindGroupLayoutEntry {
+                binding: 0,
+                visibility: wgpu::ShaderStage::VERTEX,
+                ty: wgpu::BindingType::UniformBuffer { 
+                    min_binding_size: None,
+                    dynamic: false,
+                },
+                count: None,
+            },
+            wgpu::BindGroupLayoutEntry {
+                binding: 1,
+                visibility: wgpu::ShaderStage::FRAGMENT,
+                ty: wgpu::BindingType::SampledTexture {
+                    multisampled: false,
+                    dimension: wgpu::TextureViewDimension::D2,
+                    component_type: wgpu::TextureComponentType::Float,
+                },
+                count: None,
+            },
+            wgpu::BindGroupLayoutEntry {
+                binding: 2,
+                visibility: wgpu::ShaderStage::FRAGMENT,
+                ty: wgpu::BindingType::Sampler{
+                    comparison: true,
+                },
+                count: None,
+            },
+        ],
+    })
+}
+
+pub fn create_main_bind_group(
+    device: &wgpu::Device,
+    main_bind_group_layout: &wgpu::BindGroupLayout,
+    uniform_buffer: &wgpu::Buffer,
+    pipeline_texture: &Texture
+) -> wgpu::BindGroup {
+    device.create_bind_group(&wgpu::BindGroupDescriptor {
+        label: None,
+        layout: main_bind_group_layout,
+        entries: &[
+            wgpu::BindGroupEntry {
+                binding: 0,
+                resource: wgpu::BindingResource::Buffer(
+                    uniform_buffer.slice(..)
+                ),
+            },
+            wgpu::BindGroupEntry {
+                binding: 1,
+                resource: wgpu::BindingResource::TextureView(pipeline_texture.get_view()),
+            },
+            wgpu::BindGroupEntry {
+                binding: 2,
+                resource: wgpu::BindingResource::Sampler(pipeline_texture.get_sampler()),
+            },
+        ],
     })
 }

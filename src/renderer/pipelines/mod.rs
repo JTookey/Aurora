@@ -5,7 +5,7 @@ mod uniforms;
 mod util;
 
 // for internal use
-use super::{LineInstance, TwoDInstance}; 
+use super::{LineInstance, TwoDInstance, Texture}; 
 use pipeline_2d::TwoDPipeline;
 use pipeline_lines::LinesPipeline;
 use uniforms::{CommonUniform, SharedUniform};

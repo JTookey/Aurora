@@ -13,7 +13,7 @@ pub use command_processor::CommandProcessor;
 pub use render_commands::{RenderCommand, LineDescription, TwoDDescription};
 
 // for internal use
-use super::TextureManager;
+use super::{TextureManager, Texture};
 use command_executor::CommandExecutor;
 use command_manager::InternalCommands;
 use instances::{LineInstance, TwoDInstance, ThreeDInstance};

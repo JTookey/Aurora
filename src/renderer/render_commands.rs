@@ -18,7 +18,21 @@ pub struct LineDescription {
 // 2D types
 #[derive(Debug)]
 pub enum TwoDTypes {
-    Rect,
+    Rectangle,
+    Circle,
+    Triangle,
+    Hexagon,
+}
+
+impl TwoDTypes {
+    pub fn to_int(&self) -> u32 {
+        match self {
+            TwoDTypes::Rectangle => { 1 },
+            TwoDTypes::Circle =>    { 2 },
+            TwoDTypes::Triangle =>  { 3 },
+            TwoDTypes::Hexagon =>   { 4 },
+        }
+    }
 }
 
 // Drescription of the 2D thing to be drawn
@@ -46,7 +60,7 @@ impl TwoDDescription {
             line_width: 0.0,
             corner_radius: 0.0,
             rotation: 0.0,
-            shape: TwoDTypes::Rect,
+            shape: TwoDTypes::Rectangle,
         }
     }
 }

@@ -10,7 +10,7 @@ mod render_commands;
 pub use renderer::RendererInstance;
 pub use command_manager::CommandManager;
 pub use command_processor::CommandProcessor;
-pub use render_commands::{RenderCommand, LineDescription, TwoDDescription};
+pub use render_commands::{RenderCommand, LineDescription, TwoDDescription, TwoDTypes};
 
 // for internal use
 use super::{TextureManager, Texture};

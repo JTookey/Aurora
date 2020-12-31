@@ -40,7 +40,7 @@ pub use start::run;
 // Main Structures that need making externally available
 pub use geometry::GeometryManager;
 pub use material::TextureManager;
-pub use renderer::{RenderCommand, RendererInstance, LineDescription, TwoDDescription};
+pub use renderer::{RenderCommand, RendererInstance, LineDescription, TwoDDescription, TwoDTypes};
 
 // For internal use
 use renderer::{CommandManager, CommandProcessor};

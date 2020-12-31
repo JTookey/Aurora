@@ -15,6 +15,8 @@ use aurora::{
 // Base structure for the application
 struct Rectangles {
     squares_texture: TextureHandle,
+    bricks_texture: TextureHandle,
+    rotation: f32,
 }
 
 // Implement the trait for the main application loop
@@ -26,9 +28,12 @@ impl BaseApp for Rectangles {
 
         // Load a texture
         let squares_texture = texture_manager.create_texture_from_file("resources/texture/Squares.png");
+        let bricks_texture = texture_manager.create_sub_texture(squares_texture, 32, 0, 32, 32);
 
         Self {
             squares_texture,
+            bricks_texture,
+            rotation: 0.0,
         }
     }
 
@@ -36,8 +41,8 @@ impl BaseApp for Rectangles {
 
     }
 
-    fn update(&mut self, _delta_t: f32) {
-
+    fn update(&mut self, delta_t: f32) {
+        self.rotation += delta_t * 0.5;
     }
 
     fn resize(&mut self) {
@@ -73,8 +78,18 @@ impl BaseApp for Rectangles {
             position: Point2::new(400.0,100.0),
             size: Vector2::new(200.0,200.0),
             texture: Some(self.squares_texture),
-            texture_opacity: 0.6,
-            corner_radius: 0.5,
+            texture_opacity: 1.0,
+            corner_radius: 0.2,
+            .. TwoDDescription::default()
+        }));
+
+        // Draw a textured rectangle
+        renderer.add(RenderCommand::Draw2D(TwoDDescription{
+            position: Point2::new(700.0,100.0),
+            size: Vector2::new(200.0,200.0),
+            texture: Some(self.bricks_texture),
+            texture_opacity: 1.0,
+            rotation: self.rotation,
             .. TwoDDescription::default()
         }));
     }

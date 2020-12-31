@@ -22,6 +22,25 @@ layout(location = 10) in float corner_radius;
 layout(location = 11) in float rotation;
 layout(location = 12) in uint shape;
 
+vec2 rotate_point(float cx,float cy,float angle, vec2 p)
+{
+  float s = sin(angle);
+  float c = cos(angle);
+
+  // translate point back to origin:
+  p.x -= cx;
+  p.y -= cy;
+
+  // rotate point
+  float xnew = p.x * c - p.y * s;
+  float ynew = p.x * s + p.y * c;
+
+  // translate point back:
+  p.x = xnew + cx;
+  p.y = ynew + cy;
+  return p;
+}
+
 void main() {
 
     // Pass straight through
@@ -35,28 +54,47 @@ void main() {
     f_uv = vec2(0.0);
     vec4 pos = vec4(0.0, 0.0, 0.0, 1.0);
 
+    // find size
+    vec2 midpoint = vec2( position.x + size.x / 2.0 , position.y + size.y / 2.0 );
+
     // Work out the positions & uvs of the all corners
     if (gl_VertexIndex == 0) {
-        pos.x = (2.0 * position.x / screen_size.x) - 1.0;
-        pos.y = 1.0 - (2.0 * position.y / screen_size.y);
+        vec2 point = vec2( position.x, position.y );
+        point = rotate_point(midpoint.x, midpoint.y, rotation, point);
+
+        pos.x = (2.0 * point.x / screen_size.x) - 1.0;
+        pos.y = 1.0 - (2.0 * point.y / screen_size.y);
+
         f_uv = vec2(-1.0 , 1.0);
         f_tex_coord = texture_coords.xy;
 
     } else if (gl_VertexIndex == 1) {
-        pos.x = (2.0 * position.x / screen_size.x) - 1.0;
-        pos.y = 1.0 - (2.0 * (position.y + size.y) / screen_size.y);
+        vec2 point = vec2( position.x, position.y + size.y );
+        point = rotate_point(midpoint.x, midpoint.y, rotation, point);
+
+        pos.x = (2.0 * point.x / screen_size.x) - 1.0;
+        pos.y = 1.0 - (2.0 * point.y / screen_size.y);
+
         f_uv = vec2(-1.0 , -1.0);
         f_tex_coord = texture_coords.xw;
 
     } else if (gl_VertexIndex == 2) {
-        pos.x = (2.0 * (position.x + size.x)/ screen_size.x) - 1.0;
-        pos.y = 1.0 - (2.0 * position.y / screen_size.y);
+        vec2 point = vec2( position.x + size.x, position.y );
+        point = rotate_point(midpoint.x, midpoint.y, rotation, point);
+
+        pos.x = (2.0 * point.x / screen_size.x) - 1.0;
+        pos.y = 1.0 - (2.0 * point.y / screen_size.y);
+
         f_uv = vec2(1.0 , 1.0);
         f_tex_coord = texture_coords.zy;
 
     } else if (gl_VertexIndex == 3) {
-        pos.x = (2.0 * (position.x + size.x) / screen_size.x) - 1.0;
-        pos.y = 1.0 - (2.0 * (position.y + size.y) / screen_size.y);
+        vec2 point = vec2( position.x + size.x, position.y + size.y);
+        point = rotate_point(midpoint.x, midpoint.y, rotation, point);
+
+        pos.x = (2.0 * point.x / screen_size.x) - 1.0;
+        pos.y = 1.0 - (2.0 * point.y / screen_size.y);
+
         f_uv = vec2(1.0 , -1.0);
         f_tex_coord = texture_coords.zw;
     } 

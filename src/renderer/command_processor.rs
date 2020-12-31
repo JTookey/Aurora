@@ -88,7 +88,7 @@ impl <'frame> CommandProcessor<'frame> {
                     line_width: desc.line_width,   
                     corner_radius: desc.corner_radius,
                     rotation: desc.rotation,     
-                    shape: 1,    
+                    shape: desc.shape.to_int(),    
                 };
 
                 // Push new instance

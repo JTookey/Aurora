@@ -68,7 +68,15 @@ impl TwoDPipeline {
         let fs_module_2d = device.create_shader_module(wgpu::include_spirv!("shaders/two_d_pipeline_Fragment.spirv"));
 
         // Create pipeline
-        let pipeline_2d = create_instanced_pipeline(device, sc_desc, &two_d_pipeline_layout, &vs_module_2d, &fs_module_2d, false);
+        let pipeline_2d = create_instanced_pipeline(
+            device, 
+            sc_desc, 
+            &two_d_pipeline_layout,
+            TwoDInstance::desc(), 
+            &vs_module_2d, 
+            &fs_module_2d, 
+            false
+        );
 
         Self {
             // Buffers
@@ -101,7 +109,8 @@ impl TwoDPipeline {
         self.pipeline_2d = create_instanced_pipeline(
             device, 
             sc_desc, 
-            &self.two_d_pipeline_layout, 
+            &self.two_d_pipeline_layout,
+            TwoDInstance::desc(), 
             &self.vs_module_2d,
             &self.fs_module_2d,
             false

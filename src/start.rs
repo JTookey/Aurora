@@ -160,7 +160,7 @@ fn start<App: BaseApp>(
                 main_app.draw(&mut cp);
 
                 // Build and Submit frame to GPU
-                renderer.build_and_submit(&command_manager, &texture_manager);
+                renderer.build_and_submit(&command_manager, &mut texture_manager);
             }
             _ => {}
         }

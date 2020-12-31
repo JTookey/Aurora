@@ -83,7 +83,7 @@ impl RendererInstance {
         self.frame = Some(frame);
     }
 
-    pub fn build_and_submit(&mut self, command_manager: &CommandManager, texture_manager: &TextureManager) {
+    pub fn build_and_submit(&mut self, command_manager: &CommandManager, texture_manager: &mut TextureManager) {
         // Render on the GPU
         if let Some(frame) = &self.frame {
             

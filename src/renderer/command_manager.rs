@@ -1,4 +1,4 @@
-use crate::{Colour, TextureHandle};
+use crate::{Colour};
 
 use super::{Renderer, RenderCommand, LineInstance, TwoDInstance, ThreeDInstance};
 
@@ -14,7 +14,7 @@ pub enum InternalCommands {
     DrawTwoDBatch{
         instance_start: usize,
         instance_end: usize,
-        texture: TextureHandle,
+        texture: Option<usize>,
     },
     None,
 }

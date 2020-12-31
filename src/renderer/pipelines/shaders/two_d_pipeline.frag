@@ -6,6 +6,11 @@ layout(location = 1) in float aspect_ratio;
 layout(location = 2) in flat uint f_shape;
 layout(location = 3) in float f_corner_radius;
 layout(location = 4) in vec4 f_col;
+layout(location = 5) in vec2 f_tex_coord;
+layout(location = 6) in float f_tex_opacity;
+
+layout(set = 0, binding = 1) uniform texture2D t_Color;
+layout(set = 0, binding = 2) uniform sampler s_Color;
 
 layout(location = 0) out vec4 o_Target;
 
@@ -55,5 +60,8 @@ void main() {
         discard;
     }
 
-    o_Target = f_col * d;
+    // Texture
+    vec4 tex = texture(sampler2D(t_Color, s_Color), f_tex_coord);
+    tex.a = 1.0;
+    o_Target = mix(tex * d, f_col * d, f_col.a );
 }

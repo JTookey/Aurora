@@ -11,15 +11,15 @@ use aurora::{
 };
 
 // Base structure for the application
-struct Empty {
+struct Lines {
 
 }
 
 // Implement the trait for the main application loop
-impl BaseApp for Empty {
+impl BaseApp for Lines {
     fn init(
         _geometry_manager: &mut GeometryManager,
-        _texture_manger: &mut TextureManager,
+        _texture_manager: &mut TextureManager,
     ) -> Self {
         Self {}
     }
@@ -89,5 +89,5 @@ impl BaseApp for Empty {
 
 // Start the app
 fn main() {
-    aurora::run::<Empty>("Lines Example");
+    aurora::run::<Lines>("Lines Example");
 }

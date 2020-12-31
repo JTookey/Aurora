@@ -66,6 +66,13 @@ impl <'frame> CommandProcessor<'frame> {
             },
 
             RenderCommand::Draw2D(desc) => {
+                // Get texture coords
+                let texture_coords = if let Some(texture_handle) = desc.texture {
+                    self.texture_manager.get_tl_br_coords_for(&texture_handle)
+                } else { 
+                    None
+                };                
+
                 // Create an instance
                 let instance = TwoDInstance {
                     position: [desc.position.x, desc.position.y],
@@ -76,7 +83,7 @@ impl <'frame> CommandProcessor<'frame> {
                         desc.colour.b as f32, 
                         desc.colour.a as f32
                         ],
-                    texture: [0.0,0.0,0.0,0.0],
+                    texture: texture_coords.unwrap_or( [0.0,0.0,0.0,0.0] ),
                     texture_opacity: desc.texture_opacity,
                     line_width: desc.line_width,   
                     corner_radius: desc.corner_radius,
@@ -87,12 +94,33 @@ impl <'frame> CommandProcessor<'frame> {
                 // Push new instance
                 let two_d_index = self.command_manager.push_two_d_instance(instance);
 
+                // Get the internal reference for the underlying texture
+                let underlying_texture = if let Some(texture_handle) = desc.texture {
+                    if let Some(sub_texture) = self.texture_manager.get_sub_texture(&texture_handle) {
+                        Some(sub_texture.texture)
+                    } else {
+                        None
+                    }
+                } else {
+                    None
+                };
+
+
+                // Flag if new command needed
                 let mut new_cmd_needed = false;
 
                 // Check if can be batched with last command
                 if let Some(InternalCommands::DrawTwoDBatch{instance_end, texture, ..}) = self.command_manager.last_mut() {
-                    if *texture == desc.texture {
+                    // Current batch has no texture
+                    if texture.is_none() {
+                        *texture = underlying_texture;
                         *instance_end += 1;
+
+                    // New command has no texture or its texture matches current batch
+                    } else if underlying_texture.is_none() || texture.unwrap() == underlying_texture.unwrap() {
+                        *instance_end += 1;
+
+                    // Neither of the above scenarios so new batch needed
                     } else {
                         new_cmd_needed = true;
                     }
@@ -105,7 +133,7 @@ impl <'frame> CommandProcessor<'frame> {
                     let new_2d_batch = InternalCommands::DrawTwoDBatch {
                         instance_start: two_d_index,
                         instance_end: two_d_index + 1,
-                        texture: desc.texture,
+                        texture: underlying_texture,
                     };
 
                     self.command_manager.push_command(new_2d_batch);

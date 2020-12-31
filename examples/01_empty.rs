@@ -15,7 +15,7 @@ struct Empty {
 impl BaseApp for Empty {
     fn init(
         _geometry_manager: &mut GeometryManager,
-        _texture_manger: &mut TextureManager,
+        _texture_manager: &mut TextureManager,
     ) -> Self {
         Self {}
     }

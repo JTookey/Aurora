@@ -6,23 +6,30 @@ use aurora::{
     Point2,
     Vector2,
     TextureManager,
+    TextureHandle,
     Renderer,
     RenderCommand,
     WindowEvent,
 };
 
 // Base structure for the application
-struct Empty {
-
+struct Rectangles {
+    squares_texture: TextureHandle,
 }
 
 // Implement the trait for the main application loop
-impl BaseApp for Empty {
+impl BaseApp for Rectangles {
     fn init(
         _geometry_manager: &mut GeometryManager,
-        _texture_manger: &mut TextureManager,
+        texture_manager: &mut TextureManager,
     ) -> Self {
-        Self {}
+
+        // Load a texture
+        let squares_texture = texture_manager.create_texture_from_file("resources/texture/Squares.png");
+
+        Self {
+            squares_texture,
+        }
     }
 
     fn handle_input(&mut self, _event: WindowEvent) {
@@ -60,10 +67,20 @@ impl BaseApp for Empty {
             },
             .. TwoDDescription::default()
         }));
+
+        // Draw a textured rectangle
+        renderer.add(RenderCommand::Draw2D(TwoDDescription{
+            position: Point2::new(400.0,100.0),
+            size: Vector2::new(200.0,200.0),
+            texture: Some(self.squares_texture),
+            texture_opacity: 0.6,
+            corner_radius: 0.5,
+            .. TwoDDescription::default()
+        }));
     }
 }
 
 // Start the app
 fn main() {
-    aurora::run::<Empty>("Lines Example");
+    aurora::run::<Rectangles>("Rectangles Example");
 }

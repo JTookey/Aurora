@@ -137,13 +137,28 @@ impl TextureManager {
         self.sub_texture_map.get(handle)
     }
 
-    pub fn get_texture(&self, handle: &TextureHandle) -> Option<&Texture> {
+    pub fn get_texture(&self, handle: &InternalHandle) -> Option<&Texture> {
         let holder = self.textures.get(handle);
         if let Some(holder) = holder {
             if let AssetHolder::Loaded(tex) = holder {
                 return Some(tex);
             }
         }
+        None
+    }
+
+    pub fn get_tl_br_coords_for(&self, handle: &InternalHandle) -> Option<[f32; 4]> {
+        if let Some(sub_texture) = self.sub_texture_map.get(handle) {
+            let tlbr = [
+                sub_texture.texture_position[0] as f32 / self.max_texture_size.x,
+                sub_texture.texture_position[1] as f32 / self.max_texture_size.y,
+                (sub_texture.texture_position[0] + sub_texture.texture_size[0]) as f32 / self.max_texture_size.x,
+                (sub_texture.texture_position[1] + sub_texture.texture_size[1]) as f32 / self.max_texture_size.y,
+            ];
+
+            return Some(tlbr);
+        }
+
         None
     }
 

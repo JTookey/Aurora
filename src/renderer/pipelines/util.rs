@@ -59,6 +59,7 @@ pub fn create_instanced_pipeline(
     device: &wgpu::Device,
     sc_desc: &wgpu::SwapChainDescriptor,
     pipeline_layout: &wgpu::PipelineLayout,
+    instance_descriptor: wgpu::VertexBufferDescriptor,
     vertex_shader: &wgpu::ShaderModule,
     fragment_shader: &wgpu::ShaderModule,
     depth_checked: bool,
@@ -120,7 +121,7 @@ pub fn create_instanced_pipeline(
         vertex_state: wgpu::VertexStateDescriptor {
             index_format: wgpu::IndexFormat::Uint16,
             vertex_buffers: &[
-                LineInstance::desc(),
+                instance_descriptor,
             ],
         },
         sample_count: 1,

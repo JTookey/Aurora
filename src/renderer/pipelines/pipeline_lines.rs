@@ -59,7 +59,15 @@ impl LinesPipeline {
         let fs_module_line = device.create_shader_module(wgpu::include_spirv!("shaders/lines_Fragment.spirv"));
 
         // Create pipeline
-        let pipeline_line = create_instanced_pipeline(device, sc_desc, &instanced_pipeline_layout, &vs_module_line, &fs_module_line, false);
+        let pipeline_line = create_instanced_pipeline(
+            device, 
+            sc_desc, 
+            &instanced_pipeline_layout,
+            LineInstance::desc(),
+            &vs_module_line, 
+            &fs_module_line, 
+            false
+        );
 
         Self {
             // Buffers
@@ -89,7 +97,8 @@ impl LinesPipeline {
         self.pipeline_line = create_instanced_pipeline(
             device, 
             sc_desc, 
-            &self.instanced_pipeline_layout, 
+            &self.instanced_pipeline_layout,
+            LineInstance::desc(), 
             &self.vs_module_line,
             &self.fs_module_line, 
             false

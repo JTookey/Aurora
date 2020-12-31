@@ -8,7 +8,7 @@ pub struct CommandExecutor<'frame> {
 
     command_manager: &'frame CommandManager,
     pipeline_manager: &'frame mut PipelineManager,
-    texture_manager: &'frame TextureManager,
+    texture_manager: &'frame mut TextureManager,
 
     clear_colour: Option<&'frame Colour>,
 
@@ -25,7 +25,7 @@ impl <'frame> CommandExecutor<'frame> {
 
         command_manager: &'frame CommandManager,
         pipeline_manager: &'frame mut PipelineManager,
-        texture_manager: &'frame TextureManager,
+        texture_manager: &'frame mut TextureManager,
     ) -> Self {
         Self {
             device,
@@ -50,6 +50,11 @@ impl <'frame> CommandExecutor<'frame> {
             self.device, 
             self.texture_manager.buffer_dimensions_required(),
         );
+
+        // Check if Textures need loading
+        if self.texture_manager.needs_preparing() {
+            self.texture_manager.prepare(self.device, self.queue);
+        }
 
         // Loop through commands
         for cmd in self.command_manager.commands() {
@@ -125,6 +130,13 @@ impl <'frame> CommandExecutor<'frame> {
                     // Count the number of instances that require rendereing
                     let mut n_instances_remaining = instance_end - instance_start;
 
+                    // Get the texture
+                    let texture_for_instances = if let Some(texture_handle) = texture {
+                        self.texture_manager.get_texture(texture_handle)
+                    } else {
+                        None
+                    };
+
                     // Not all might fit in a single render pass due to limits on buffer size and therefore
                     // number of instances that can be rendered... so we will loop.
                     while n_instances_remaining > 0 {
@@ -162,7 +174,7 @@ impl <'frame> CommandExecutor<'frame> {
                             self.frame,
                             *instance_start as u32, 
                             *instance_end as u32,
-                            None,
+                            texture_for_instances,
                             load_op,
                         );
                     }

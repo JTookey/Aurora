@@ -16,16 +16,18 @@ pub struct LineDescription {
 }
 
 // 2D types
+#[derive(Debug)]
 pub enum TwoDTypes {
     Rect,
 }
 
 // Drescription of the 2D thing to be drawn
+#[derive(Debug)]
 pub struct TwoDDescription {
     pub position: Point2,
     pub size: Vector2,
     pub colour: Colour,
-    pub texture: TextureHandle,
+    pub texture: Option<TextureHandle>,
     pub texture_opacity: f32,
     pub line_width: f32,
     pub corner_radius: f32,
@@ -39,7 +41,7 @@ impl TwoDDescription {
             position: Point2::new(0.0,0.0),
             size: Vector2::new(0.0,0.0),
             colour: Colour::TRANSPARENT,
-            texture: 0,
+            texture: None,
             texture_opacity: 0.0,
             line_width: 0.0,
             corner_radius: 0.0,

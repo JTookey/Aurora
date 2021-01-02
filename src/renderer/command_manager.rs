@@ -1,6 +1,6 @@
 use crate::{Colour};
 
-use super::{Renderer, RenderCommand, LineInstance, TwoDInstance, ThreeDInstance};
+use super::{Renderer, RenderCommand, LineInstance, TwoDInstance, ThreeDInstance, Section};
 
 // These are the internally stored commands that allow us batch renderpasses together
 pub enum InternalCommands {
@@ -15,6 +15,10 @@ pub enum InternalCommands {
         instance_start: usize,
         instance_end: usize,
         texture: Option<usize>,
+    },
+    DrawTextBatch{
+        section_start: usize,
+        section_end: usize,
     },
     None,
 }

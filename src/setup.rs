@@ -13,7 +13,7 @@ pub struct Setup {
     pub queue: wgpu::Queue,
 }
 
-pub async fn setup<App: BaseApp>(title: &str) -> Setup {
+pub async fn setup<'a, App: BaseApp<'a>>(title: &str) -> Setup {
     #[cfg(not(target_arch = "wasm32"))]
     {
         let chrome_tracing_dir = std::env::var("WGPU_CHROME_TRACE");

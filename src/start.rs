@@ -9,6 +9,7 @@ use super::{
     RendererInstance,
     CommandManager,
     CommandProcessor,
+    SectionManager,
 };
 
 use winit::{
@@ -16,7 +17,7 @@ use winit::{
     event_loop::ControlFlow
 };
 
-fn start<App: BaseApp>(
+fn start<'a, App: BaseApp<'a>>(
     Setup {
         window,
         event_loop,
@@ -152,15 +153,20 @@ fn start<App: BaseApp>(
                 command_manager.clear();
                 renderer.init_new_frame();
 
+                let mut section_manager = SectionManager::new();
+
                 // Request app to draw to frame
-                let mut cp = CommandProcessor::create(
-                    &mut command_manager, 
-                    &mut texture_manager,
-                );
-                main_app.draw(&mut cp);
+                {
+                    let mut cp = CommandProcessor::create(
+                        &mut command_manager,
+                        &mut section_manager,
+                        &mut texture_manager,
+                    );
+                    main_app.draw(&mut cp);
+                }
 
                 // Build and Submit frame to GPU
-                renderer.build_and_submit(&command_manager, &mut texture_manager);
+                renderer.build_and_submit(&command_manager, &mut section_manager, &mut texture_manager);
             }
             _ => {}
         }
@@ -169,7 +175,7 @@ fn start<App: BaseApp>(
 
 
 #[cfg(not(target_arch = "wasm32"))]
-pub fn run<App: BaseApp>(title: &str) {
+pub fn run<App: BaseApp<'static>>(title: &str) {
     let setup = futures::executor::block_on(setup::<App>(title));
     start::<App>(setup);
 }

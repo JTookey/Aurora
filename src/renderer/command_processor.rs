@@ -7,25 +7,29 @@ use super::{
     CommandManager,
     TextureManager,
     Renderer,
+    SectionManager,
 };
 
-pub struct CommandProcessor<'frame> {
+pub struct CommandProcessor<'frame, 'sm> {
     command_manager: &'frame mut CommandManager,
+    section_manager: &'frame mut SectionManager<'sm>,
     texture_manager: &'frame mut TextureManager,
 }
 
-impl <'frame> CommandProcessor<'frame> {
+impl <'frame, 'sm> CommandProcessor<'frame, 'sm> {
     pub fn create(
         command_manager: &'frame mut CommandManager,
+        section_manager: &'frame mut SectionManager<'sm>,
         texture_manager: &'frame mut TextureManager,
     ) -> Self {
         Self {
             command_manager,
+            section_manager,
             texture_manager,
         }
     }
 
-    pub fn process_cmd(&mut self, new_cmd: RenderCommand) {
+    pub fn process_cmd(&mut self, new_cmd: RenderCommand<'sm>) {
         match new_cmd {
             RenderCommand::Clear(colour) => {
                 self.command_manager.push_command(InternalCommands::Clear{
@@ -139,12 +143,32 @@ impl <'frame> CommandProcessor<'frame> {
                     self.command_manager.push_command(new_2d_batch);
                 }
             },
+
+            RenderCommand::DrawText(section) => {
+                // Add the section
+                let section_index = self.section_manager.push(section);
+
+                // Check if can be batched with last command
+                if let Some(InternalCommands::DrawTextBatch{section_end, ..}) = self.command_manager.last_mut() {
+                    *section_end += 1;
+
+                // If not then create a new batch command
+                } else {
+                    let new_section_batch = InternalCommands::DrawTextBatch {
+                        section_start: section_index,
+                        section_end: section_index + 1,
+                    };
+
+                    self.command_manager.push_command(new_section_batch);
+                }
+            }
+
         }
     }
 }
 
-impl Renderer for CommandProcessor<'_> {
-    fn add(&mut self, cmd: RenderCommand) {
+impl <'frame, 'sm> Renderer<'sm> for CommandProcessor<'frame, 'sm> {
+    fn add(&mut self, cmd: RenderCommand<'sm>) {
         self.process_cmd(cmd);
     }
 }

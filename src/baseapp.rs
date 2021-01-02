@@ -6,7 +6,7 @@ use crate::{
 
 use winit::event::WindowEvent;
 
-pub trait BaseApp: 'static + Sized {
+pub trait BaseApp<'a>: 'static + Sized {
     fn optional_features() -> wgpu::Features {
         wgpu::Features::empty()
     }
@@ -23,5 +23,5 @@ pub trait BaseApp: 'static + Sized {
     fn handle_input(&mut self, event: WindowEvent);
     fn update(&mut self, delta_t: f32);
     fn resize(&mut self);
-    fn draw<R: Renderer>(&mut self, renderer: &mut R);
+    fn draw<R: Renderer<'a>>(&mut self, renderer: &mut R);
 }

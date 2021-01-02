@@ -1,10 +1,11 @@
-use crate::{Colour, Point2, Vector2, TextureHandle};
+use crate::{Colour, Point2, Vector2, TextureHandle, Section};
 
 // The render command presented to the library user
-pub enum RenderCommand {
+pub enum RenderCommand<'s> {
     Clear(Colour),
     DrawLine(LineDescription),
     Draw2D(TwoDDescription),
+    DrawText(Section<'s>)
 }
 
 // Description of the line to be drawn

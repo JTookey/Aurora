@@ -10,6 +10,8 @@ use aurora::{
     Renderer,
     RenderCommand,
     WindowEvent,
+    Section,
+    Text,
 };
 
 // Base structure for the application
@@ -20,7 +22,7 @@ struct Rectangles {
 }
 
 // Implement the trait for the main application loop
-impl BaseApp for Rectangles {
+impl <'app> BaseApp<'app> for Rectangles {
     fn init(
         _geometry_manager: &mut GeometryManager,
         texture_manager: &mut TextureManager,
@@ -49,7 +51,7 @@ impl BaseApp for Rectangles {
 
     }
 
-    fn draw<R: Renderer>(&mut self, renderer: &mut R) {
+    fn draw<R: Renderer<'app>>(&mut self, renderer: &mut R) {
         // Clear the screen
         renderer.add(RenderCommand::Clear(
             Colour{
@@ -92,6 +94,29 @@ impl BaseApp for Rectangles {
             rotation: self.rotation,
             .. TwoDDescription::default()
         }));
+
+        // Add text
+        renderer.add(RenderCommand::DrawText(
+            Section::default()
+                .add_text(
+                    Text::new("Hello World!")
+                    .with_scale(30.0)
+                )
+                .with_screen_position((200.0, 600.0))
+        ));
+
+        // Add text
+        renderer.add(RenderCommand::DrawText(
+            Section::default()
+            .add_text(
+                Text::new("Hello SPACE!!")
+                    .with_scale(30.0)
+                    .with_color(
+                        [1.0, 1.0, 0.0, 1.0]
+                    )
+            )
+            .with_screen_position((200.0, 630.0))
+        ));
     }
 }
 

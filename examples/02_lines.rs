@@ -16,7 +16,7 @@ struct Lines {
 }
 
 // Implement the trait for the main application loop
-impl BaseApp for Lines {
+impl <'app> BaseApp<'app> for Lines {
     fn init(
         _geometry_manager: &mut GeometryManager,
         _texture_manager: &mut TextureManager,
@@ -36,7 +36,7 @@ impl BaseApp for Lines {
 
     }
 
-    fn draw<R: Renderer>(&mut self, renderer: &mut R) {
+    fn draw<R: Renderer<'app>>(&mut self, renderer: &mut R) {
         // Clear the screen
         renderer.add(RenderCommand::Clear(
             Colour{

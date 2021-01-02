@@ -5,6 +5,7 @@ use super::{
     Renderer,
     RenderCommand,
     TextureManager,
+    SectionManager,
 };
 
 pub struct RendererInstance {
@@ -83,7 +84,7 @@ impl RendererInstance {
         self.frame = Some(frame);
     }
 
-    pub fn build_and_submit(&mut self, command_manager: &CommandManager, texture_manager: &mut TextureManager) {
+    pub fn build_and_submit<'frame>(&mut self, command_manager: &CommandManager, section_manger:&mut SectionManager<'frame>, texture_manager: &mut TextureManager) {
         // Render on the GPU
         if let Some(frame) = &self.frame {
             
@@ -93,6 +94,7 @@ impl RendererInstance {
                 &self.queue, 
                 frame, 
                 command_manager,
+                section_manger,
                 &mut self.pipeline_manager,
                 texture_manager,
             );

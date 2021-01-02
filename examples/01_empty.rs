@@ -12,7 +12,7 @@ struct Empty {
 }
 
 // Implement the trait for the main application loop
-impl BaseApp for Empty {
+impl <'app> BaseApp<'app> for Empty {
     fn init(
         _geometry_manager: &mut GeometryManager,
         _texture_manager: &mut TextureManager,
@@ -32,7 +32,7 @@ impl BaseApp for Empty {
 
     }
 
-    fn draw<R: Renderer>(&mut self, _renderer: &mut R) {
+    fn draw<R: Renderer<'app>>(&mut self, _renderer: &mut R) {
 
     }
 }

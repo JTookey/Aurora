@@ -1,12 +1,13 @@
 use crate::Colour;
-use super::{CommandManager, PipelineManager, TextureManager, InternalCommands, MAX_INSTANCES};
+use super::{CommandManager, SectionManager, PipelineManager, TextureManager, InternalCommands, MAX_INSTANCES};
 
-pub struct CommandExecutor<'frame> {
+pub struct CommandExecutor<'frame, 'sm> {
     device: &'frame wgpu::Device,
     queue:  &'frame wgpu::Queue,
     frame: &'frame wgpu::SwapChainFrame,
 
     command_manager: &'frame CommandManager,
+    section_manager: &'frame mut SectionManager<'sm>,
     pipeline_manager: &'frame mut PipelineManager,
     texture_manager: &'frame mut TextureManager,
 
@@ -17,13 +18,14 @@ pub struct CommandExecutor<'frame> {
     three_d_instances_on_gpu: Option<(usize, usize)>,
 }
 
-impl <'frame> CommandExecutor<'frame> {
+impl <'frame, 'sm> CommandExecutor<'frame, 'sm> {
     pub fn new(
         device: &'frame wgpu::Device,
         queue:  &'frame wgpu::Queue,
         frame: &'frame wgpu::SwapChainFrame,
 
         command_manager: &'frame CommandManager,
+        section_manager: &'frame mut SectionManager<'sm>,
         pipeline_manager: &'frame mut PipelineManager,
         texture_manager: &'frame mut TextureManager,
     ) -> Self {
@@ -33,6 +35,7 @@ impl <'frame> CommandExecutor<'frame> {
             frame,
 
             command_manager,
+            section_manager,
             pipeline_manager,
             texture_manager,
 
@@ -179,6 +182,14 @@ impl <'frame> CommandExecutor<'frame> {
                         );
                     }
                 },
+
+                InternalCommands::DrawTextBatch{section_start, section_end} => {
+                    self.pipeline_manager.render_sections(
+                        self.device, 
+                        self.queue, 
+                        self.frame, 
+                        self.section_manager.get_sections(*section_start, *section_end));
+                }
 
                 _ => {},
             }

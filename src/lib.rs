@@ -10,6 +10,8 @@ mod start;
 
 // Types
 pub type Colour = wgpu::Color;
+pub type Section<'s> = wgpu_glyph::Section<'s>;
+pub type Text<'t> = wgpu_glyph::Text<'t>;
 pub type Point2 = cgmath::Point2<f32>;
 pub type Point3 = cgmath::Point3<f32>;
 pub type Vector2 = cgmath::Vector2<f32>;
@@ -43,5 +45,5 @@ pub use material::TextureManager;
 pub use renderer::{RenderCommand, RendererInstance, LineDescription, TwoDDescription, TwoDTypes};
 
 // For internal use
-use renderer::{CommandManager, CommandProcessor};
+use renderer::{CommandManager, CommandProcessor, SectionManager};
 use material::Texture;

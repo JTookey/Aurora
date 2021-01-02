@@ -1,5 +1,5 @@
 use crate::Vector2;
-use super::{CommonUniform, SharedUniform, LineInstance, LinesPipeline, TwoDInstance, TwoDPipeline, Texture};
+use super::{CommonUniform, SharedUniform, LineInstance, LinesPipeline, TwoDInstance, TwoDPipeline, Texture, TextPipeline, Section};
 
 use wgpu::util::DeviceExt;
 pub const MAX_INSTANCES: usize = 500;
@@ -13,6 +13,7 @@ pub struct PipelineManager {
     // Pipeline
     pipeline_lines: LinesPipeline,
     pipeline_2d: TwoDPipeline,
+    pipeline_text: TextPipeline,
 }
 
 impl PipelineManager {
@@ -57,6 +58,11 @@ impl PipelineManager {
             &common_uniform_buffer
         );
 
+        let pipeline_text = TextPipeline::new(
+            device,
+            sc_desc,
+        );
+
         Self {
             // Buffers
             shared_uniform_buffer,
@@ -65,6 +71,7 @@ impl PipelineManager {
             // Pipelines
             pipeline_lines,
             pipeline_2d,
+            pipeline_text,
         }
     }
 
@@ -82,6 +89,9 @@ impl PipelineManager {
         );
         self.pipeline_2d.resize(
             device,
+            sc_desc,
+        );
+        self.pipeline_text.resize(
             sc_desc,
         );
 
@@ -173,6 +183,22 @@ impl PipelineManager {
             end_instance,
             texture,
             load_op,
+        );
+    }
+
+    // Method for rendering text - pass on the command to the Text Pipeline
+    pub fn render_sections(
+        &mut self,
+        device: &wgpu::Device,
+        queue: &wgpu::Queue,
+        frame: &wgpu::SwapChainFrame,
+        sections: &mut [Option<Section>],
+    ) {
+        self.pipeline_text.render_sections(
+            device,
+            queue,
+            frame,
+            sections,
         );
     }
 }

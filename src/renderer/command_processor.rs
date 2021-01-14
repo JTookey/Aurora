@@ -1,7 +1,6 @@
 use super::{
     LineInstance,
     TwoDInstance,
-    ThreeDInstance,
     InternalCommands,
     RenderCommand,
     CommandManager,

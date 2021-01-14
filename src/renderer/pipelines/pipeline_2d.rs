@@ -2,7 +2,7 @@ use crate::{Texture, Vector2};
 
 use super::{
     MAX_INSTANCES,
-    CommonUniform, TwoDInstance,
+    TwoDInstance,
     util::*,
 };
 

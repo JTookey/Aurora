@@ -13,4 +13,4 @@ use pipeline_text::TextPipeline;
 use uniforms::{CommonUniform, SharedUniform};
 
 // public for external use
-pub use manager::{PipelineManager,MAX_INSTANCES, MAX_QUADS_PER_DRAW};
+pub use manager::{PipelineManager,MAX_INSTANCES};

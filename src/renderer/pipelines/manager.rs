@@ -3,7 +3,6 @@ use super::{CommonUniform, SharedUniform, LineInstance, LinesPipeline, TwoDInsta
 
 use wgpu::util::DeviceExt;
 pub const MAX_INSTANCES: usize = 500;
-pub const MAX_QUADS_PER_DRAW: usize = 500;
 
 pub struct PipelineManager {
     // Buffers

@@ -1,6 +1,6 @@
 use crate::{Colour};
 
-use super::{Renderer, RenderCommand, LineInstance, TwoDInstance, ThreeDInstance, Section};
+use super::{LineInstance, TwoDInstance, ThreeDInstance};
 
 // These are the internally stored commands that allow us batch renderpasses together
 pub enum InternalCommands {

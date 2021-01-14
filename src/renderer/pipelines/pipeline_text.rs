@@ -1,12 +1,8 @@
 use super::Section;
-use wgpu_glyph::{ab_glyph, GlyphBrush, GlyphBrushBuilder, Text};
+use wgpu_glyph::{ab_glyph, GlyphBrush, GlyphBrushBuilder};
 
-use std::io::BufReader;
-use std::io::prelude::*;
-use std::fs::File;
-
-const FontFormat: wgpu::TextureFormat = wgpu::TextureFormat::Bgra8UnormSrgb;
-const DefaultFont: &'static [u8] = include_bytes!("../../../resources/font/Comfortaa-Regular.ttf");
+const FONT_FORMAT: wgpu::TextureFormat = wgpu::TextureFormat::Bgra8UnormSrgb;
+const DEFAULT_FONT: &'static [u8] = include_bytes!("../../../resources/font/Comfortaa-Regular.ttf");
 
 pub struct TextPipeline {
     glyphbrush: GlyphBrush<()>,
@@ -20,11 +16,11 @@ impl TextPipeline {
     pub fn new(device: &wgpu::Device, sc_desc: &wgpu::SwapChainDescriptor) -> Self {
 
         // Read the font
-        let glyphs = ab_glyph::FontArc::try_from_slice(DefaultFont).unwrap();
+        let glyphs = ab_glyph::FontArc::try_from_slice(DEFAULT_FONT).unwrap();
     
         // Create the glyphbrush
         let glyphbrush = GlyphBrushBuilder::using_font(glyphs)
-            .build(&device, FontFormat);
+            .build(&device, FONT_FORMAT);
 
         // Create a stating belt - I'm assuming this is bytes in size... may need more...
         let staging_belt = wgpu::util::StagingBelt::new(1024);

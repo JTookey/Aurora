@@ -19,7 +19,7 @@ use super::{TextureManager, Texture, Section};
 use command_executor::CommandExecutor;
 use command_manager::InternalCommands;
 use instances::{LineInstance, TwoDInstance, ThreeDInstance};
-use pipelines::{PipelineManager, MAX_INSTANCES, MAX_QUADS_PER_DRAW};
+use pipelines::{PipelineManager, MAX_INSTANCES};
 
 // Trait
 pub trait Renderer<'cmd> {

@@ -30,7 +30,7 @@ fn start<App: BaseApp>(
     }: Setup,
 ) {
     #[cfg(not(target_arch = "wasm32"))]
-    let (mut pool, spawner) = {
+    let (mut pool, _spawner) = {
         let local_pool = futures::executor::LocalPool::new();
         let spawner = local_pool.spawner();
         (local_pool, spawner)

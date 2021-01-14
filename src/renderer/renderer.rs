@@ -2,8 +2,6 @@ use super::{
     CommandExecutor,
     CommandManager,
     PipelineManager,
-    Renderer,
-    RenderCommand,
     TextureManager,
     SectionManager,
 };

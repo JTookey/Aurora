@@ -1,6 +1,6 @@
 use super::{
     MAX_INSTANCES,
-    CommonUniform, LineInstance,
+    LineInstance,
     util::*,
 };
 
@@ -9,7 +9,7 @@ pub struct LinesPipeline {
     pub instance_buffer_lines: wgpu::Buffer,
 
     // Bind Groups
-    instanced_bindgroup_layout: wgpu::BindGroupLayout,
+    _instanced_bindgroup_layout: wgpu::BindGroupLayout,
     line_bind_group: wgpu::BindGroup,
 
     // Shader Modules
@@ -74,7 +74,7 @@ impl LinesPipeline {
             instance_buffer_lines,
 
             // Bind Groups
-            instanced_bindgroup_layout,
+            _instanced_bindgroup_layout: instanced_bindgroup_layout,
             line_bind_group,
 
             // Shader Modules

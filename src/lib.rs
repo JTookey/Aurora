@@ -30,7 +30,6 @@ pub type TextureHandle = usize;
 // Enums
 #[derive(Debug)]
 enum AssetHolder<T,P> {
-    Unloaded(String),
     Unprepared(P),
     Loaded(T),
 }

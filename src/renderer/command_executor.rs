@@ -15,7 +15,7 @@ pub struct CommandExecutor<'ce, 'frame> {
 
     line_instances_on_gpu: Option<(usize, usize)>,
     two_d_instances_on_gpu: Option<(usize, usize)>,
-    three_d_instances_on_gpu: Option<(usize, usize)>,
+    _three_d_instances_on_gpu: Option<(usize, usize)>,
 }
 
 impl <'ce, 'frame: 'ce> CommandExecutor<'ce, 'frame> {
@@ -43,7 +43,7 @@ impl <'ce, 'frame: 'ce> CommandExecutor<'ce, 'frame> {
 
             line_instances_on_gpu: None,
             two_d_instances_on_gpu: None,
-            three_d_instances_on_gpu: None,
+            _three_d_instances_on_gpu: None,
         }   
     }
 

@@ -1,4 +1,4 @@
-use super::{LineInstance, Texture};
+use super::Texture;
 
 pub fn create_render_pass<'frame>(
     encoder: &'frame mut wgpu::CommandEncoder, 

@@ -16,7 +16,11 @@ pub type Point2 = cgmath::Point2<f32>;
 pub type Point3 = cgmath::Point3<f32>;
 pub type Vector2 = cgmath::Vector2<f32>;
 pub type Vector3 = cgmath::Vector3<f32>;
+pub type WindowSize = winit::dpi::PhysicalSize<u32>;
 pub type WindowEvent<'a> = winit::event::WindowEvent<'a>;
+pub type KeyCode = winit::event::VirtualKeyCode;
+pub type KeyState = winit::event::ElementState;
+pub type MouseButton = winit::event::MouseButton;
 
 // Handles
 pub type GeometryHandle = usize;

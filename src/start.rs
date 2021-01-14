@@ -17,7 +17,7 @@ use winit::{
     event_loop::ControlFlow
 };
 
-fn start<'a, App: BaseApp<'a>>(
+fn start<App: BaseApp>(
     Setup {
         window,
         event_loop,
@@ -68,7 +68,7 @@ fn start<'a, App: BaseApp<'a>>(
         queue,
     );
 
-    let mut main_app = App::init(&mut geometry_manager, &mut texture_manager);
+    let mut main_app = App::init(size, &mut geometry_manager, &mut texture_manager);
 
     log::info!("Creating timer...");
     #[cfg(not(target_arch = "wasm32"))]
@@ -120,6 +120,7 @@ fn start<'a, App: BaseApp<'a>>(
                 ..
             } => {
                 log::info!("Resizing to {:?}", size);
+                main_app.resize(size);
                 renderer.resize(size);
             }
 
@@ -149,33 +150,45 @@ fn start<'a, App: BaseApp<'a>>(
                 // Update the app
                 main_app.update( delta_t.as_secs_f32() );
 
-                // Start a new frame
-                command_manager.clear();
-                renderer.init_new_frame();
-
-                let mut section_manager = SectionManager::new();
-
-                // Request app to draw to frame
-                {
-                    let mut cp = CommandProcessor::create(
-                        &mut command_manager,
-                        &mut section_manager,
-                        &mut texture_manager,
-                    );
-                    main_app.draw(&mut cp);
-                }
-
-                // Build and Submit frame to GPU
-                renderer.build_and_submit(&command_manager, &mut section_manager, &mut texture_manager);
+                render_frame(
+                    &mut main_app, 
+                    &mut command_manager, 
+                    &mut texture_manager, 
+                    &mut renderer
+                );
+                
             }
             _ => {}
         }
     });
 }
 
+fn render_frame<'frame, App: BaseApp>(
+    main_app: &mut App, 
+    command_manager: &mut CommandManager, 
+    texture_manager: &mut TextureManager,
+    renderer: &mut RendererInstance,
+) {
+    // Start a new frame
+    command_manager.clear();
+    renderer.init_new_frame();
+
+    let mut section_manager = SectionManager::new();
+
+    // Request app to draw to frame
+    let cp = CommandProcessor::create(
+        command_manager,
+        &mut section_manager,
+        texture_manager,
+    );
+    main_app.draw(cp);
+
+    // Build and Submit frame to GPU
+    renderer.build_and_submit(command_manager, &mut section_manager, texture_manager);
+}
 
 #[cfg(not(target_arch = "wasm32"))]
-pub fn run<App: BaseApp<'static>>(title: &str) {
+pub fn run<App: BaseApp>(title: &str) {
     let setup = futures::executor::block_on(setup::<App>(title));
     start::<App>(setup);
 }

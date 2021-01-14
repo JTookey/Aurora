@@ -22,6 +22,6 @@ use instances::{LineInstance, TwoDInstance, ThreeDInstance};
 use pipelines::{PipelineManager, MAX_INSTANCES, MAX_QUADS_PER_DRAW};
 
 // Trait
-pub trait Renderer<'sm> {
-    fn add(&mut self, cmd: RenderCommand<'sm>);
+pub trait Renderer<'cmd> {
+    fn add(&mut self, cmd: RenderCommand<'cmd>);
 }

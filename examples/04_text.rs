@@ -2,31 +2,30 @@ use aurora::{
     BaseApp,
     Colour,
     GeometryManager,
-    TwoDDescription,
-    Point2,
-    Vector2,
     TextureManager,
-    TextureHandle,
     Renderer,
     RenderCommand,
     WindowEvent,
     Section,
     Text,
+    WindowSize,
 };
 
 // Base structure for the application
 struct TextExample {
+    text: String,
 }
 
 // Implement the trait for the main application loop
-impl <'app> BaseApp<'app> for TextExample {
+impl BaseApp for TextExample {
     fn init(
+        _window_size: WindowSize,
         _geometry_manager: &mut GeometryManager,
         _texture_manager: &mut TextureManager,
     ) -> Self {
 
         Self {
-
+            text: String::from("Text Example")
         }
     }
 
@@ -38,11 +37,11 @@ impl <'app> BaseApp<'app> for TextExample {
         
     }
 
-    fn resize(&mut self) {
+    fn resize(&mut self, _size: WindowSize) {
 
     }
 
-    fn draw<R: Renderer<'app>>(&mut self, renderer: &mut R) {
+    fn draw<'draw, R: Renderer<'draw>>(&'draw mut self, mut renderer: R) {
         // Clear the screen
         renderer.add(RenderCommand::Clear(
             Colour{
@@ -57,8 +56,11 @@ impl <'app> BaseApp<'app> for TextExample {
         renderer.add(RenderCommand::DrawText(
             Section::default()
                 .add_text(
-                    Text::new("Hello World!")
+                    Text::new(&self.text)
                     .with_scale(30.0)
+                    .with_color(
+                        [1.0, 1.0, 0.0, 1.0]
+                    )
                 )
                 .with_screen_position((200.0, 600.0))
         ));

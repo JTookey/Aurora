@@ -4,6 +4,7 @@ use aurora::{
     TextureManager,
     Renderer,
     WindowEvent,
+    WindowSize,
 };
 
 // Base structure for the application
@@ -12,8 +13,9 @@ struct Empty {
 }
 
 // Implement the trait for the main application loop
-impl <'app> BaseApp<'app> for Empty {
+impl <'app> BaseApp for Empty {
     fn init(
+        _window_size: WindowSize,
         _geometry_manager: &mut GeometryManager,
         _texture_manager: &mut TextureManager,
     ) -> Self {
@@ -28,11 +30,11 @@ impl <'app> BaseApp<'app> for Empty {
 
     }
 
-    fn resize(&mut self) {
+    fn resize(&mut self, _size: WindowSize) {
 
     }
 
-    fn draw<R: Renderer<'app>>(&mut self, _renderer: &mut R) {
+    fn draw<'draw, R: Renderer<'draw>>(&mut self, _renderer: R) {
 
     }
 }

@@ -10,16 +10,16 @@ use super::{
     SectionManager,
 };
 
-pub struct CommandProcessor<'frame, 'sm> {
+pub struct CommandProcessor<'frame, 'cmd, 'sm> {
     command_manager: &'frame mut CommandManager,
-    section_manager: &'frame mut SectionManager<'sm>,
+    section_manager: &'sm mut SectionManager<'cmd>,
     texture_manager: &'frame mut TextureManager,
 }
 
-impl <'frame, 'sm> CommandProcessor<'frame, 'sm> {
+impl <'frame, 'cmd, 'sm> CommandProcessor<'frame, 'cmd,'sm> {
     pub fn create(
         command_manager: &'frame mut CommandManager,
-        section_manager: &'frame mut SectionManager<'sm>,
+        section_manager: &'sm mut SectionManager<'cmd>,
         texture_manager: &'frame mut TextureManager,
     ) -> Self {
         Self {
@@ -29,7 +29,7 @@ impl <'frame, 'sm> CommandProcessor<'frame, 'sm> {
         }
     }
 
-    pub fn process_cmd(&mut self, new_cmd: RenderCommand<'sm>) {
+    pub fn process_cmd(&mut self, new_cmd: RenderCommand<'cmd>) {
         match new_cmd {
             RenderCommand::Clear(colour) => {
                 self.command_manager.push_command(InternalCommands::Clear{
@@ -167,8 +167,8 @@ impl <'frame, 'sm> CommandProcessor<'frame, 'sm> {
     }
 }
 
-impl <'frame, 'sm> Renderer<'sm> for CommandProcessor<'frame, 'sm> {
-    fn add(&mut self, cmd: RenderCommand<'sm>) {
+impl <'frame, 'cmd, 'sm> Renderer<'cmd> for CommandProcessor<'frame, 'cmd, 'sm> {
+    fn add(&mut self, cmd: RenderCommand<'cmd>) {
         self.process_cmd(cmd);
     }
 }

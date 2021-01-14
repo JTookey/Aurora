@@ -1,33 +1,33 @@
 use crate::Colour;
 use super::{CommandManager, SectionManager, PipelineManager, TextureManager, InternalCommands, MAX_INSTANCES};
 
-pub struct CommandExecutor<'frame, 'sm> {
-    device: &'frame wgpu::Device,
-    queue:  &'frame wgpu::Queue,
-    frame: &'frame wgpu::SwapChainFrame,
+pub struct CommandExecutor<'ce, 'frame> {
+    device: &'ce wgpu::Device,
+    queue:  &'ce wgpu::Queue,
+    frame: &'ce wgpu::SwapChainFrame,
 
-    command_manager: &'frame CommandManager,
-    section_manager: &'frame mut SectionManager<'sm>,
-    pipeline_manager: &'frame mut PipelineManager,
-    texture_manager: &'frame mut TextureManager,
+    command_manager: &'ce CommandManager,
+    section_manager: &'ce mut SectionManager<'frame>,
+    pipeline_manager: &'ce mut PipelineManager,
+    texture_manager: &'ce mut TextureManager,
 
-    clear_colour: Option<&'frame Colour>,
+    clear_colour: Option<&'ce Colour>,
 
     line_instances_on_gpu: Option<(usize, usize)>,
     two_d_instances_on_gpu: Option<(usize, usize)>,
     three_d_instances_on_gpu: Option<(usize, usize)>,
 }
 
-impl <'frame, 'sm> CommandExecutor<'frame, 'sm> {
+impl <'ce, 'frame: 'ce> CommandExecutor<'ce, 'frame> {
     pub fn new(
-        device: &'frame wgpu::Device,
-        queue:  &'frame wgpu::Queue,
-        frame: &'frame wgpu::SwapChainFrame,
+        device: &'ce wgpu::Device,
+        queue:  &'ce wgpu::Queue,
+        frame: &'ce wgpu::SwapChainFrame,
 
-        command_manager: &'frame CommandManager,
-        section_manager: &'frame mut SectionManager<'sm>,
-        pipeline_manager: &'frame mut PipelineManager,
-        texture_manager: &'frame mut TextureManager,
+        command_manager: &'ce CommandManager,
+        section_manager: &'ce mut SectionManager<'frame>,
+        pipeline_manager: &'ce mut PipelineManager,
+        texture_manager: &'ce mut TextureManager,
     ) -> Self {
         Self {
             device,

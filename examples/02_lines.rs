@@ -8,6 +8,7 @@ use aurora::{
     Renderer,
     RenderCommand,
     WindowEvent,
+    WindowSize,
 };
 
 // Base structure for the application
@@ -16,8 +17,9 @@ struct Lines {
 }
 
 // Implement the trait for the main application loop
-impl <'app> BaseApp<'app> for Lines {
+impl BaseApp for Lines {
     fn init(
+        _window_size: WindowSize,
         _geometry_manager: &mut GeometryManager,
         _texture_manager: &mut TextureManager,
     ) -> Self {
@@ -32,11 +34,11 @@ impl <'app> BaseApp<'app> for Lines {
 
     }
 
-    fn resize(&mut self) {
+    fn resize(&mut self, _size: WindowSize) {
 
     }
 
-    fn draw<R: Renderer<'app>>(&mut self, renderer: &mut R) {
+    fn draw<'draw, R: Renderer<'draw>>(&mut self, mut renderer: R) {
         // Clear the screen
         renderer.add(RenderCommand::Clear(
             Colour{

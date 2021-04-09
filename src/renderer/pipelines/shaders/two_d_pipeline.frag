@@ -62,6 +62,5 @@ void main() {
 
     // Texture
     vec4 tex = texture(sampler2D(t_Color, s_Color), f_tex_coord);
-    tex.a = 1.0;
     o_Target = mix(tex * d, f_col * d, f_col.a );
 }

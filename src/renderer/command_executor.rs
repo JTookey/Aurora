@@ -127,11 +127,11 @@ impl <'ce, 'frame: 'ce> CommandExecutor<'ce, 'frame> {
 
                 InternalCommands::DrawTwoDBatch{instance_start, instance_end, texture} => {
                     // Create local variables
-                    let mut load_start_id = *instance_start;
-                    let load_end_id = *instance_end;
+                    let mut batch_start_id = *instance_start;
+                    let batch_end_id = *instance_end;
                     
                     // Count the number of instances that require rendereing
-                    let mut n_instances_remaining = instance_end - instance_start;
+                    let mut n_remaining_in_batch = (batch_end_id - batch_start_id) as i32;
 
                     // Get the texture
                     let texture_for_instances = if let Some(texture_handle) = texture {
@@ -142,9 +142,9 @@ impl <'ce, 'frame: 'ce> CommandExecutor<'ce, 'frame> {
 
                     // Not all might fit in a single render pass due to limits on buffer size and therefore
                     // number of instances that can be rendered... so we will loop.
-                    while n_instances_remaining > 0 {
-                        if let Some((start_id, end_id)) = instances_to_load(
-                            (load_start_id, load_end_id), 
+                    while n_remaining_in_batch > 0 {
+                        if let Some((to_load_start_id, to_load_end_id)) = instances_to_load(
+                            (batch_start_id, batch_end_id), 
                             self.two_d_instances_on_gpu, 
                             self.command_manager.n_two_d_instance()
                         ) {
@@ -152,22 +152,22 @@ impl <'ce, 'frame: 'ce> CommandExecutor<'ce, 'frame> {
                             // Write instances to the GPU
                             self.pipeline_manager.update_two_d_instances(
                                 self.queue, 
-                                self.command_manager.get_two_d_instances(load_start_id, load_end_id));
+                                self.command_manager.get_two_d_instances(to_load_start_id, to_load_end_id));
 
                             // Count how many - will end the loop if n_instances_remaining reaches zero
-                            n_instances_remaining -= end_id - start_id;
+                            n_remaining_in_batch -= (to_load_end_id - to_load_start_id) as i32;
                             
                             // Prep for next loop if required
-                            if n_instances_remaining != 0 {
-                                load_start_id = end_id + 1;
+                            if n_remaining_in_batch > 0 {
+                                batch_start_id = to_load_end_id + 1;
                             }
 
                             // Update the records
-                            self.two_d_instances_on_gpu = Some((start_id, end_id));
+                            self.two_d_instances_on_gpu = Some((to_load_start_id, to_load_end_id));
 
                         } else {
                             // Everything required already on GPU - cancel the loop
-                            n_instances_remaining = 0;
+                            n_remaining_in_batch = 0;
                         }
 
                         // Render instances
@@ -198,6 +198,7 @@ impl <'ce, 'frame: 'ce> CommandExecutor<'ce, 'frame> {
 }
 
 fn instances_to_load(range_requested: (usize, usize), on_gpu: Option<(usize, usize)>, total_instances: usize) -> Option<(usize, usize)> {
+    
     // Check if anything is on gpu
     if let Some((on_gpu_start_id, on_gpu_end_id)) = on_gpu {
         // If required instances are in the range of what is on the GPU -> do nothing
@@ -205,7 +206,7 @@ fn instances_to_load(range_requested: (usize, usize), on_gpu: Option<(usize, usi
     }
 
     // Else get all the instances that are possible starting from the first requested
-    let new_end = (range_requested.0 + MAX_INSTANCES).min(total_instances);
+    let new_end = (range_requested.0 + MAX_INSTANCES).min(total_instances); 
 
     Some((range_requested.0, new_end))
 } 

@@ -63,7 +63,7 @@ impl RendererInstance {
         }
     }
 
-    pub fn init_new_frame(&mut self) {
+    pub fn init_new_frame(&mut self) {       
         // Attempt to aquire a new frame
         let frame = if let Ok(frame) = self.surface.get_current_texture() {
             frame
@@ -109,6 +109,9 @@ impl RendererInstance {
         // Resize the swap chain
         self.config.width = if self.size.width == 0 { 1 } else { self.size.width };
         self.config.height = if self.size.height == 0 { 1 } else { self.size.height };
+
+        // Reconfigure the surface
+        self.surface.configure(&self.device, &self.config);
 
         // Resize the pipelines (i.e. the depth buffers)
         self.pipeline_manager.resize(

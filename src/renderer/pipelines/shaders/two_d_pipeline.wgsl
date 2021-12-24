@@ -35,7 +35,7 @@ fn rotate_point(cx: f32, cy: f32, angle: f32, p: vec2<f32>) -> vec2<f32>
   new_p.x = xnew + cx;
   new_p.y = ynew + cy;
 
-  return p;
+  return new_p;
 }
 
 [[stage(vertex)]]
@@ -142,7 +142,9 @@ fn asLine(d: f32, thickness: f32) -> f32 {
 }
 
 [[stage(fragment)]]
-fn fs_main(in: VertexOutput) -> [[location(0)]] vec4<f32> {
+fn fs_main(
+    in: VertexOutput
+) -> [[location(0)]] vec4<f32> {
     
     // Set a default value for the distance function
     var d: f32 = 1.0;
@@ -166,7 +168,7 @@ fn fs_main(in: VertexOutput) -> [[location(0)]] vec4<f32> {
 
     // Transparency
     if (d<0.01) {
-        return tex;
+        discard;
     }
 
     // Texture

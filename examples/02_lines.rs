@@ -59,7 +59,7 @@ impl BaseApp for Lines {
                 x: 400.0,
                 y: 300.0,
             },
-            width: 1.0,
+            width: 3.0,
             colour: Colour{
                 r: 1.0,
                 g: 0.0,

@@ -1,3 +1,5 @@
+use std::borrow::Cow;
+
 use super::{
     MAX_INSTANCES,
     LineInstance,
@@ -13,8 +15,7 @@ pub struct LinesPipeline {
     line_bind_group: wgpu::BindGroup,
 
     // Shader Modules
-    vs_module_line: wgpu::ShaderModule,
-    fs_module_line: wgpu::ShaderModule,
+    module_line: wgpu::ShaderModule,
 
     // Pipeline
     instanced_pipeline_layout: wgpu::PipelineLayout,
@@ -24,7 +25,7 @@ pub struct LinesPipeline {
 impl LinesPipeline {
     pub fn new(
         device: &wgpu::Device,
-        sc_desc: &wgpu::SwapChainDescriptor,
+        config: &wgpu::SurfaceConfiguration,
         common_uniform_buffer: &wgpu::Buffer,
     ) -> Self {
 
@@ -34,7 +35,7 @@ impl LinesPipeline {
             label: Some("Line Instance Buffer"),
             mapped_at_creation: false,
             size: instance_buffer_line_size,
-            usage: wgpu::BufferUsage::VERTEX | wgpu::BufferUsage::COPY_DST,
+            usage: wgpu::BufferUsages::VERTEX | wgpu::BufferUsages::COPY_DST,
         });
 
         // Create bind group layouts
@@ -55,17 +56,19 @@ impl LinesPipeline {
         });
 
         // Import shaders
-        let vs_module_line = device.create_shader_module(wgpu::include_spirv!("shaders/lines_Vertex.spirv"));
-        let fs_module_line = device.create_shader_module(wgpu::include_spirv!("shaders/lines_Fragment.spirv"));
+        let module_line = device.create_shader_module(&wgpu::ShaderModuleDescriptor {
+            label: Some("Lines Pipeline Shader"),
+            source: wgpu::ShaderSource::Wgsl(Cow::Borrowed(include_str!("shaders/lines_pipeline.wgsl"))),
+        });
+        //let fs_module_line = device.create_shader_module(&wgpu::include_spirv!("shaders/lines_Fragment.spirv"));
 
         // Create pipeline
         let pipeline_line = create_instanced_pipeline(
-            device, 
-            sc_desc, 
+            device,
+            config,
             &instanced_pipeline_layout,
             LineInstance::desc(),
-            &vs_module_line, 
-            &fs_module_line, 
+            &module_line, 
             false
         );
 
@@ -78,8 +81,7 @@ impl LinesPipeline {
             line_bind_group,
 
             // Shader Modules
-            vs_module_line,
-            fs_module_line,
+            module_line,
 
             // Pipeline
             instanced_pipeline_layout,
@@ -91,16 +93,15 @@ impl LinesPipeline {
     pub fn resize(
         &mut self, 
         device: &wgpu::Device,
-        sc_desc: &wgpu::SwapChainDescriptor
+        config: &wgpu::SurfaceConfiguration
     ) {
         // Recreate the pipeline
         self.pipeline_line = create_instanced_pipeline(
-            device, 
-            sc_desc, 
+            device,
+            config,
             &self.instanced_pipeline_layout,
-            LineInstance::desc(), 
-            &self.vs_module_line,
-            &self.fs_module_line, 
+            LineInstance::desc(),
+            &self.module_line,
             false
         );
     }
@@ -122,7 +123,7 @@ impl LinesPipeline {
         &mut self,
         device: &wgpu::Device,
         queue: &wgpu::Queue,
-        frame: &wgpu::SwapChainFrame,
+        frame_view: &wgpu::TextureView,
         start_instance: u32,
         end_instance: u32,
         load_op: wgpu::LoadOp<wgpu::Color>,
@@ -137,7 +138,7 @@ impl LinesPipeline {
         {
             let mut rpass = create_render_pass(
                 &mut encoder, 
-                frame, 
+                frame_view, 
                 None,
                 load_op,
             );

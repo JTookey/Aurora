@@ -13,7 +13,7 @@ pub struct TextPipeline {
 }
 
 impl TextPipeline {
-    pub fn new(device: &wgpu::Device, sc_desc: &wgpu::SwapChainDescriptor) -> Self {
+    pub fn new(device: &wgpu::Device, config: &wgpu::SurfaceConfiguration) -> Self {
 
         // Read the font
         let glyphs = ab_glyph::FontArc::try_from_slice(DEFAULT_FONT).unwrap();
@@ -30,7 +30,7 @@ impl TextPipeline {
         let local_spawner = local_pool.spawner();
 
         // Local canvas size
-        let canvas_size = (sc_desc.width, sc_desc.height);
+        let canvas_size = (config.width, config.height);
 
         Self {
             glyphbrush,
@@ -41,7 +41,7 @@ impl TextPipeline {
         }
     }
 
-    pub fn resize(&mut self, sc_desc: &wgpu::SwapChainDescriptor) {
+    pub fn resize(&mut self, sc_desc: &wgpu::SurfaceConfiguration) {
         self.canvas_size = (sc_desc.width, sc_desc.height);
     }
 
@@ -49,7 +49,7 @@ impl TextPipeline {
         &mut self,
         device: &wgpu::Device,
         queue: &wgpu::Queue,
-        frame: &wgpu::SwapChainFrame,
+        frame_view: &wgpu::TextureView,
         sections: &mut [Option<Section>],
     ) {
         // Create command encoder
@@ -70,7 +70,7 @@ impl TextPipeline {
                 &device,
                 &mut self.staging_belt,
                 &mut encoder,
-                &frame.output.view,
+                &frame_view,
                 self.canvas_size.0,
                 self.canvas_size.1,
             )

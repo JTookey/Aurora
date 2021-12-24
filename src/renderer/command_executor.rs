@@ -4,7 +4,9 @@ use super::{CommandManager, SectionManager, PipelineManager, TextureManager, Int
 pub struct CommandExecutor<'ce, 'frame> {
     device: &'ce wgpu::Device,
     queue:  &'ce wgpu::Queue,
-    frame: &'ce wgpu::SwapChainFrame,
+    frame: &'ce wgpu::SurfaceTexture,
+    frame_view: &'ce wgpu::TextureView,
+
 
     command_manager: &'ce CommandManager,
     section_manager: &'ce mut SectionManager<'frame>,
@@ -22,7 +24,8 @@ impl <'ce, 'frame: 'ce> CommandExecutor<'ce, 'frame> {
     pub fn new(
         device: &'ce wgpu::Device,
         queue:  &'ce wgpu::Queue,
-        frame: &'ce wgpu::SwapChainFrame,
+        frame: &'ce wgpu::SurfaceTexture,
+        frame_view: &'ce wgpu::TextureView,
 
         command_manager: &'ce CommandManager,
         section_manager: &'ce mut SectionManager<'frame>,
@@ -33,6 +36,7 @@ impl <'ce, 'frame: 'ce> CommandExecutor<'ce, 'frame> {
             device,
             queue,
             frame,
+            frame_view,
 
             command_manager,
             section_manager,
@@ -117,7 +121,7 @@ impl <'ce, 'frame: 'ce> CommandExecutor<'ce, 'frame> {
                         self.pipeline_manager.render_lines(
                             self.device, 
                             self.queue, 
-                            self.frame,
+                            self.frame_view,
                             *line_instance_start as u32, 
                             *line_instance_end as u32, 
                             load_op,
@@ -174,7 +178,7 @@ impl <'ce, 'frame: 'ce> CommandExecutor<'ce, 'frame> {
                         self.pipeline_manager.render_2d(
                             self.device, 
                             self.queue, 
-                            self.frame,
+                            self.frame_view,
                             *instance_start as u32, 
                             *instance_end as u32,
                             texture_for_instances,
@@ -187,7 +191,7 @@ impl <'ce, 'frame: 'ce> CommandExecutor<'ce, 'frame> {
                     self.pipeline_manager.render_sections(
                         self.device, 
                         self.queue, 
-                        self.frame, 
+                        self.frame_view, 
                         self.section_manager.get_sections(*section_start, *section_end));
                 }
 

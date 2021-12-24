@@ -1,3 +1,7 @@
+use std::borrow::Cow;
+
+use wgpu::SurfaceConfiguration;
+
 use crate::{Texture, Vector2};
 
 use super::{
@@ -18,8 +22,7 @@ pub struct TwoDPipeline {
     two_d_bind_group: wgpu::BindGroup,
 
     // Shader Modules
-    vs_module_2d: wgpu::ShaderModule,
-    fs_module_2d: wgpu::ShaderModule,
+    module_2d: wgpu::ShaderModule,
 
     // Pipeline
     two_d_pipeline_layout: wgpu::PipelineLayout,
@@ -29,7 +32,7 @@ pub struct TwoDPipeline {
 impl TwoDPipeline {
     pub fn new(
         device: &wgpu::Device,
-        sc_desc: &wgpu::SwapChainDescriptor,
+        config: &wgpu::SurfaceConfiguration,
         common_uniform_buffer: &wgpu::Buffer,
     ) -> Self {
 
@@ -39,7 +42,7 @@ impl TwoDPipeline {
             label: Some("Line Instance Buffer"),
             mapped_at_creation: false,
             size: instance_buffer_2d_size,
-            usage: wgpu::BufferUsage::VERTEX | wgpu::BufferUsage::COPY_DST,
+            usage: wgpu::BufferUsages::VERTEX | wgpu::BufferUsages::COPY_DST,
         });
 
         // Create Initial Pipeline Texture
@@ -64,17 +67,19 @@ impl TwoDPipeline {
         });
 
         // Import shaders
-        let vs_module_2d = device.create_shader_module(wgpu::include_spirv!("shaders/two_d_pipeline_Vertex.spirv"));
-        let fs_module_2d = device.create_shader_module(wgpu::include_spirv!("shaders/two_d_pipeline_Fragment.spirv"));
+        let module_2d = device.create_shader_module(&wgpu::ShaderModuleDescriptor {
+            label: Some("2D Pipeline Shader"),
+            source: wgpu::ShaderSource::Wgsl(Cow::Borrowed(include_str!("shaders/two_d_pipeline.wgsl"))),
+        });
+        //let fs_module_2d = device.create_shader_module(&wgpu::include_spirv!("shaders/two_d_pipeline_Fragment.spirv"));
 
         // Create pipeline
         let pipeline_2d = create_instanced_pipeline(
             device, 
-            sc_desc, 
+            config,
             &two_d_pipeline_layout,
-            TwoDInstance::desc(), 
-            &vs_module_2d, 
-            &fs_module_2d, 
+            TwoDInstance::desc(),
+            &module_2d, 
             false
         );
 
@@ -90,8 +95,7 @@ impl TwoDPipeline {
             two_d_bind_group,
 
             // Shader Modules
-            vs_module_2d,
-            fs_module_2d,
+            module_2d,
 
             // Pipeline
             two_d_pipeline_layout,
@@ -103,16 +107,15 @@ impl TwoDPipeline {
     pub fn resize(
         &mut self, 
         device: &wgpu::Device,
-        sc_desc: &wgpu::SwapChainDescriptor
+        config: &SurfaceConfiguration,
     ) {
         // Recreate the pipeline
         self.pipeline_2d = create_instanced_pipeline(
-            device, 
-            sc_desc, 
+            device,
+            config,
             &self.two_d_pipeline_layout,
-            TwoDInstance::desc(), 
-            &self.vs_module_2d,
-            &self.fs_module_2d,
+            TwoDInstance::desc(),
+            &self.module_2d,
             false
         );
     }
@@ -148,7 +151,7 @@ impl TwoDPipeline {
         &mut self,
         device: &wgpu::Device,
         queue: &wgpu::Queue,
-        frame: &wgpu::SwapChainFrame,
+        frame_view: &wgpu::TextureView,
         start_instance: u32,
         end_instance: u32,
         texture: Option<&Texture>,
@@ -163,7 +166,7 @@ impl TwoDPipeline {
         // Copy texture to bound resources
         if let Some(tex) = texture {
             encoder.copy_texture_to_texture(
-                wgpu::TextureCopyView {
+                wgpu::ImageCopyTexture {
                     texture: tex.get_texture_buffer(),
                     mip_level: 0,
                     origin: wgpu::Origin3d {
@@ -171,8 +174,9 @@ impl TwoDPipeline {
                         y: 0,
                         z: 0,
                     },
+                    aspect: wgpu::TextureAspect::All,
                 },
-                wgpu::TextureCopyView {
+                wgpu::ImageCopyTexture {
                     texture: self.pipeline_texture.get_texture_buffer(),
                     mip_level: 0,
                     origin: wgpu::Origin3d {
@@ -180,6 +184,7 @@ impl TwoDPipeline {
                         y: 0,
                         z: 0,
                     },
+                    aspect: wgpu::TextureAspect::All,
                 }, 
                 tex.get_extent());
         }
@@ -188,7 +193,7 @@ impl TwoDPipeline {
         {
             let mut rpass = create_render_pass(
                 &mut encoder, 
-                frame, 
+                frame_view, 
                 None,
                 load_op,
             );

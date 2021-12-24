@@ -11,28 +11,28 @@ pub struct LineInstance {
 }
 
 impl <'a> LineInstance {
-    pub fn desc() -> wgpu::VertexBufferDescriptor<'a> {
-        wgpu::VertexBufferDescriptor {
-            step_mode: wgpu::InputStepMode::Instance,
-            stride: mem::size_of::<LineInstance>() as wgpu::BufferAddress,
+    pub fn desc() -> wgpu::VertexBufferLayout<'a> {
+        wgpu::VertexBufferLayout {
+            step_mode: wgpu::VertexStepMode::Instance,
+            array_stride: mem::size_of::<LineInstance>() as wgpu::BufferAddress,
             attributes: &[
-                wgpu::VertexAttributeDescriptor {
-                    format: wgpu::VertexFormat::Float2,
+                wgpu::VertexAttribute {
+                    format: wgpu::VertexFormat::Float32x2,
                     offset: 0,
                     shader_location: 4,
                 },
-                wgpu::VertexAttributeDescriptor {
-                    format: wgpu::VertexFormat::Float2,
+                wgpu::VertexAttribute {
+                    format: wgpu::VertexFormat::Float32x2,
                     offset: mem::size_of::<[f32; 2]>() as wgpu::BufferAddress,
                     shader_location: 5,
                 },
-                wgpu::VertexAttributeDescriptor {
-                    format: wgpu::VertexFormat::Float4,
+                wgpu::VertexAttribute {
+                    format: wgpu::VertexFormat::Float32x4,
                     offset: mem::size_of::<[f32; 4]>() as wgpu::BufferAddress,
                     shader_location: 6,
                 },
-                wgpu::VertexAttributeDescriptor {
-                    format: wgpu::VertexFormat::Float,
+                wgpu::VertexAttribute {
+                    format: wgpu::VertexFormat::Float32,
                     offset: mem::size_of::<[f32; 8]>() as wgpu::BufferAddress,
                     shader_location: 7,
                 },
@@ -56,53 +56,53 @@ pub struct TwoDInstance {
 }
 
 impl <'a> TwoDInstance {
-    pub fn desc() -> wgpu::VertexBufferDescriptor<'a> {
-        wgpu::VertexBufferDescriptor {
-            step_mode: wgpu::InputStepMode::Instance,
-            stride: mem::size_of::<TwoDInstance>() as wgpu::BufferAddress,
+    pub fn desc() -> wgpu::VertexBufferLayout<'a> {
+        wgpu::VertexBufferLayout {
+            step_mode: wgpu::VertexStepMode::Instance,
+            array_stride: mem::size_of::<TwoDInstance>() as wgpu::BufferAddress,
             attributes: &[
-                wgpu::VertexAttributeDescriptor {
-                    format: wgpu::VertexFormat::Float2,
+                wgpu::VertexAttribute {
+                    format: wgpu::VertexFormat::Float32x2,
                     offset: 0,
                     shader_location: 4,
                 },
-                wgpu::VertexAttributeDescriptor {
-                    format: wgpu::VertexFormat::Float2,
+                wgpu::VertexAttribute {
+                    format: wgpu::VertexFormat::Float32x2,
                     offset: mem::size_of::<[f32; 2]>() as wgpu::BufferAddress,
                     shader_location: 5,
                 },
-                wgpu::VertexAttributeDescriptor {
-                    format: wgpu::VertexFormat::Float4,
+                wgpu::VertexAttribute {
+                    format: wgpu::VertexFormat::Float32x4,
                     offset: mem::size_of::<[f32; 4]>() as wgpu::BufferAddress,
                     shader_location: 6,
                 },
-                wgpu::VertexAttributeDescriptor {
-                    format: wgpu::VertexFormat::Float4,
+                wgpu::VertexAttribute {
+                    format: wgpu::VertexFormat::Float32x4,
                     offset: mem::size_of::<[f32; 8]>() as wgpu::BufferAddress,
                     shader_location: 7,
                 },
-                wgpu::VertexAttributeDescriptor {
-                    format: wgpu::VertexFormat::Float,
+                wgpu::VertexAttribute {
+                    format: wgpu::VertexFormat::Float32,
                     offset: mem::size_of::<[f32; 12]>() as wgpu::BufferAddress,
                     shader_location: 8,
                 },
-                wgpu::VertexAttributeDescriptor {
-                    format: wgpu::VertexFormat::Float,
+                wgpu::VertexAttribute {
+                    format: wgpu::VertexFormat::Float32,
                     offset: mem::size_of::<[f32; 13]>() as wgpu::BufferAddress,
                     shader_location: 9,
                 },
-                wgpu::VertexAttributeDescriptor {
-                    format: wgpu::VertexFormat::Float,
+                wgpu::VertexAttribute {
+                    format: wgpu::VertexFormat::Float32,
                     offset: mem::size_of::<[f32; 14]>() as wgpu::BufferAddress,
                     shader_location: 10,
                 },
-                wgpu::VertexAttributeDescriptor {
-                    format: wgpu::VertexFormat::Float,
+                wgpu::VertexAttribute {
+                    format: wgpu::VertexFormat::Float32,
                     offset: mem::size_of::<[f32; 15]>() as wgpu::BufferAddress,
                     shader_location: 11,
                 },
-                wgpu::VertexAttributeDescriptor {
-                    format: wgpu::VertexFormat::Uint,
+                wgpu::VertexAttribute {
+                    format: wgpu::VertexFormat::Uint32,
                     offset: mem::size_of::<[f32; 16]>() as wgpu::BufferAddress,
                     shader_location: 12,
                 },

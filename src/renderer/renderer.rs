@@ -14,10 +14,9 @@ pub struct RendererInstance {
     device: wgpu::Device,
     queue: wgpu::Queue,
 
-    sc_desc: wgpu::SwapChainDescriptor,
-    swap_chain: wgpu::SwapChain,
+    config: wgpu::SurfaceConfiguration,
 
-    frame: Option<wgpu::SwapChainFrame>,
+    frame: Option<wgpu::SurfaceTexture>,
 
     pipeline_manager: PipelineManager,
 }
@@ -31,25 +30,24 @@ impl RendererInstance {
         device: wgpu::Device,
         queue: wgpu::Queue,
     ) -> Self {
+
+        // Get the preferred format
+        let swapchain_format = surface.get_preferred_format(&adapter).unwrap();
+
         // Create the Swap Chain Descriptor
-        let sc_desc = wgpu::SwapChainDescriptor {
-            usage: wgpu::TextureUsage::OUTPUT_ATTACHMENT,
+        let config = wgpu::SurfaceConfiguration  {
+            usage: wgpu::TextureUsages::RENDER_ATTACHMENT,
             // TODO: Allow srgb unconditionally
-            format: if cfg!(target_arch = "wasm32") {
-                wgpu::TextureFormat::Bgra8Unorm
-            } else {
-                wgpu::TextureFormat::Bgra8UnormSrgb
-            },
+            format: swapchain_format,
             width: size.width,
             height: size.height,
             present_mode: wgpu::PresentMode::Immediate,
         };
 
-        // Create the actual Swap Chain
-        let swap_chain = device.create_swap_chain(&surface, &sc_desc);
+        surface.configure(&device, &config);
 
         // Create Pipeline Manager
-        let pipeline_manager = PipelineManager::new(&device, &sc_desc);
+        let pipeline_manager = PipelineManager::new(&device, &config);
 
         // Build and return the Render Instance
         RendererInstance{
@@ -59,8 +57,7 @@ impl RendererInstance {
             _adapter: adapter,
             device,
             queue,
-            sc_desc,
-            swap_chain,
+            config,
             frame: None,
             pipeline_manager,
         }
@@ -68,14 +65,11 @@ impl RendererInstance {
 
     pub fn init_new_frame(&mut self) {
         // Attempt to aquire a new frame
-        let frame = match self.swap_chain.get_current_frame() {
-            Ok(frame) => frame,
-            Err(_) => {
-                self.swap_chain = self.device.create_swap_chain(&self.surface, &self.sc_desc);
-                self.swap_chain
-                    .get_current_frame()
-                    .expect("Failed to acquire next swap chain texture!")
-            }
+        let frame = if let Ok(frame) = self.surface.get_current_texture() {
+            frame
+        } else {
+            self.surface.configure(&self.device, &self.config);
+            self.surface.get_current_texture().expect("Failed to acquire next swap chain frame!")
         };
 
         // Provide the frame to be rendered too
@@ -85,12 +79,15 @@ impl RendererInstance {
     pub fn build_and_submit<'frame>(&mut self, command_manager: &CommandManager, section_manger:&mut SectionManager<'frame>, texture_manager: &mut TextureManager) {
         // Render on the GPU
         if let Some(frame) = &self.frame {
+
+            let frame_view = frame.texture.create_view(&wgpu::TextureViewDescriptor::default());
             
             // Create Command Executor
             let mut ce = CommandExecutor::new(
                 &self.device,
                 &self.queue, 
-                frame, 
+                frame,
+                &frame_view,
                 command_manager,
                 section_manger,
                 &mut self.pipeline_manager,
@@ -102,7 +99,7 @@ impl RendererInstance {
         }
 
         // Drop the frame to present it to the Surface
-        self.frame.take();
+        self.frame.take().unwrap().present();
     }
 
     pub fn resize(&mut self, new_size: winit::dpi::PhysicalSize<u32>) {
@@ -110,15 +107,14 @@ impl RendererInstance {
         self.size = new_size;
 
         // Resize the swap chain
-        self.sc_desc.width = if self.size.width == 0 { 1 } else { self.size.width };
-        self.sc_desc.height = if self.size.height == 0 { 1 } else { self.size.height };
-        self.swap_chain = self.device.create_swap_chain(&self.surface, &self.sc_desc);
+        self.config.width = if self.size.width == 0 { 1 } else { self.size.width };
+        self.config.height = if self.size.height == 0 { 1 } else { self.size.height };
 
         // Resize the pipelines (i.e. the depth buffers)
         self.pipeline_manager.resize(
             &self.device, 
             &self.queue, 
-            &self.sc_desc
+            &self.config
         );
     }
 }

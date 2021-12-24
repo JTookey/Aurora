@@ -2,13 +2,14 @@ use super::Texture;
 
 pub fn create_render_pass<'frame>(
     encoder: &'frame mut wgpu::CommandEncoder, 
-    frame: &'frame wgpu::SwapChainFrame,
-    depth_attachement: std::option::Option<wgpu::RenderPassDepthStencilAttachmentDescriptor<'frame>>,
+    frame_view: &'frame wgpu::TextureView,
+    depth_attachement: std::option::Option<wgpu::RenderPassDepthStencilAttachment<'frame>>,
     load_op: wgpu::LoadOp<wgpu::Color>,
 ) -> wgpu::RenderPass<'frame> {
     encoder.begin_render_pass(&wgpu::RenderPassDescriptor {
-        color_attachments: &[wgpu::RenderPassColorAttachmentDescriptor {
-            attachment: &frame.output.view,
+        label: None,
+        color_attachments: &[wgpu::RenderPassColorAttachment {
+            view: &frame_view,
             resolve_target: None,
             ops: wgpu::Operations {
                 load: load_op,
@@ -25,10 +26,11 @@ pub fn create_instanced_bind_group_layout(device: &wgpu::Device) -> wgpu::BindGr
         entries: &[
             wgpu::BindGroupLayoutEntry {
                 binding: 0,
-                visibility: wgpu::ShaderStage::VERTEX,
-                ty: wgpu::BindingType::UniformBuffer { 
+                visibility: wgpu::ShaderStages::VERTEX,
+                ty: wgpu::BindingType::Buffer {
+                    ty: wgpu::BufferBindingType::Uniform,
                     min_binding_size: None,
-                    dynamic: false,
+                    has_dynamic_offset: false,
                 },
                 count: None,
             },
@@ -48,7 +50,11 @@ pub fn create_instanced_bind_group(
             wgpu::BindGroupEntry {
                 binding: 0,
                 resource: wgpu::BindingResource::Buffer(
-                    uniform_buffer.slice(..)
+                    wgpu::BufferBinding{
+                        buffer: uniform_buffer,
+                        offset: 0,
+                        size: None,
+                    }
                 ),
             },
         ],
@@ -57,25 +63,29 @@ pub fn create_instanced_bind_group(
 
 pub fn create_instanced_pipeline(
     device: &wgpu::Device,
-    sc_desc: &wgpu::SwapChainDescriptor,
+    config: &wgpu::SurfaceConfiguration,
     pipeline_layout: &wgpu::PipelineLayout,
-    instance_descriptor: wgpu::VertexBufferDescriptor,
-    vertex_shader: &wgpu::ShaderModule,
-    fragment_shader: &wgpu::ShaderModule,
+    vertex_buffer_layout: wgpu::VertexBufferLayout,
+    shader: &wgpu::ShaderModule,
     depth_checked: bool,
 ) -> wgpu::RenderPipeline {
 
     // Define the depth descriptor
     let depth_descriptor = if depth_checked {
-        Some(wgpu::DepthStencilStateDescriptor {
+        Some(wgpu::DepthStencilState {
             format: wgpu::TextureFormat::Depth32Float,
             depth_write_enabled: true,
             depth_compare: wgpu::CompareFunction::Less,
-            stencil: wgpu::StencilStateDescriptor{
-                front: wgpu::StencilStateFaceDescriptor::IGNORE,
-                back: wgpu::StencilStateFaceDescriptor::IGNORE,
+            stencil: wgpu::StencilState{
+                front: wgpu::StencilFaceState::IGNORE,
+                back: wgpu::StencilFaceState::IGNORE,
                 read_mask: 0,
                 write_mask: 0,
+            },
+            bias: wgpu::DepthBiasState { 
+                constant: 1, 
+                slope_scale: 1.0, 
+                clamp: 0.0, 
             },            
         })
     } else {
@@ -86,47 +96,32 @@ pub fn create_instanced_pipeline(
     device.create_render_pipeline(&wgpu::RenderPipelineDescriptor {
         label: None,
         layout: Some(pipeline_layout),
-        vertex_stage: wgpu::ProgrammableStageDescriptor {
-            module: vertex_shader,
-            entry_point: "main",
+        vertex: wgpu::VertexState {
+            module: shader,
+            entry_point: "vs_main",
+            buffers: &[vertex_buffer_layout],
         },
-        fragment_stage: Some(wgpu::ProgrammableStageDescriptor {
-            module: fragment_shader,
-            entry_point: "main",
+        fragment: Some(wgpu::FragmentState {
+            module: shader,
+            entry_point: "fs_main",
+            targets: &[config.format.into()],
         }),
-        rasterization_state: Some(wgpu::RasterizationStateDescriptor {
+        primitive: wgpu::PrimitiveState {
+            topology: wgpu::PrimitiveTopology::TriangleStrip,
+            strip_index_format: None,
             front_face: wgpu::FrontFace::Ccw,
-            cull_mode: wgpu::CullMode::Back,
-            depth_bias: 0,
-            depth_bias_slope_scale: 0.0,
-            depth_bias_clamp: 0.0,
-            clamp_depth: false,
-        }),
-        primitive_topology: wgpu::PrimitiveTopology::TriangleStrip,
-        color_states: &[wgpu::ColorStateDescriptor {
-            format: sc_desc.format,
-            color_blend: wgpu::BlendDescriptor {
-                src_factor: wgpu::BlendFactor::SrcAlpha,
-                dst_factor: wgpu::BlendFactor::OneMinusSrcAlpha,
-                operation: wgpu::BlendOperation::Add,
-            },
-            alpha_blend: wgpu::BlendDescriptor {
-                src_factor: wgpu::BlendFactor::SrcAlpha,
-                dst_factor: wgpu::BlendFactor::DstAlpha,
-                operation: wgpu::BlendOperation::Max,
-            },
-            write_mask: wgpu::ColorWrite::ALL,
-        }],
-        depth_stencil_state: depth_descriptor,
-        vertex_state: wgpu::VertexStateDescriptor {
-            index_format: wgpu::IndexFormat::Uint16,
-            vertex_buffers: &[
-                instance_descriptor,
-            ],
+            cull_mode: Some(wgpu::Face::Back),
+            unclipped_depth: false,
+            polygon_mode: wgpu::PolygonMode::Fill,
+            conservative: false,
         },
-        sample_count: 1,
-        sample_mask: !0,
-        alpha_to_coverage_enabled: false,
+        multisample: wgpu::MultisampleState { 
+            count: 1, 
+            mask: !0, 
+            alpha_to_coverage_enabled: false 
+        },
+        multiview: None,
+        depth_stencil: depth_descriptor,
     })
 }
 
@@ -136,29 +131,32 @@ pub fn create_main_bind_group_layout(device: &wgpu::Device) -> wgpu::BindGroupLa
         entries: &[
             wgpu::BindGroupLayoutEntry {
                 binding: 0,
-                visibility: wgpu::ShaderStage::VERTEX,
-                ty: wgpu::BindingType::UniformBuffer { 
+                visibility: wgpu::ShaderStages::VERTEX,
+                ty: wgpu::BindingType::Buffer {
+                    ty: wgpu::BufferBindingType::Uniform,
                     min_binding_size: None,
-                    dynamic: false,
+                    has_dynamic_offset: false,
                 },
                 count: None,
             },
             wgpu::BindGroupLayoutEntry {
                 binding: 1,
-                visibility: wgpu::ShaderStage::FRAGMENT,
-                ty: wgpu::BindingType::SampledTexture {
+                visibility: wgpu::ShaderStages::FRAGMENT,
+                ty: wgpu::BindingType::Texture{
+                    sample_type: wgpu::TextureSampleType::Float {
+                        filterable: true,
+                    },
+                    view_dimension: wgpu::TextureViewDimension::D2,
                     multisampled: false,
-                    dimension: wgpu::TextureViewDimension::D2,
-                    component_type: wgpu::TextureComponentType::Float,
                 },
                 count: None,
             },
             wgpu::BindGroupLayoutEntry {
                 binding: 2,
-                visibility: wgpu::ShaderStage::FRAGMENT,
-                ty: wgpu::BindingType::Sampler{
-                    comparison: true,
-                },
+                visibility: wgpu::ShaderStages::FRAGMENT,
+                ty: wgpu::BindingType::Sampler(
+                    wgpu::SamplerBindingType::Filtering
+                ),
                 count: None,
             },
         ],
@@ -178,7 +176,11 @@ pub fn create_main_bind_group(
             wgpu::BindGroupEntry {
                 binding: 0,
                 resource: wgpu::BindingResource::Buffer(
-                    uniform_buffer.slice(..)
+                    wgpu::BufferBinding{
+                        buffer: uniform_buffer,
+                        offset: 0,
+                        size: None,
+                    }
                 ),
             },
             wgpu::BindGroupEntry {

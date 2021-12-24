@@ -18,7 +18,7 @@ pub struct PipelineManager {
 impl PipelineManager {
     pub fn new(
         device: &wgpu::Device,
-        sc_desc: &wgpu::SwapChainDescriptor,
+        config: &wgpu::SurfaceConfiguration,
     ) -> Self {
 
         // Shared Uniform
@@ -30,36 +30,36 @@ impl PipelineManager {
         let shared_uniform_buffer = device.create_buffer_init(&wgpu::util::BufferInitDescriptor{
             label: Some("Shared Uniform Buffer"),
             contents:   bytemuck::bytes_of(&shared_uniform), 
-            usage: wgpu::BufferUsage::UNIFORM | wgpu::BufferUsage::COPY_DST
+            usage: wgpu::BufferUsages::UNIFORM | wgpu::BufferUsages::COPY_DST
         });
 
         // Common Uniform
         let common_uniform = CommonUniform{
-            screen_size: [sc_desc.width as f32, sc_desc.height as f32],
+            screen_size: [config.width as f32, config.height as f32],
         };
         let common_uniform_buffer = device.create_buffer_init(&wgpu::util::BufferInitDescriptor{
             label: Some("Commmon Uniform Buffer"),
             contents: bytemuck::bytes_of(&common_uniform), 
-            usage: wgpu::BufferUsage::UNIFORM | wgpu::BufferUsage::COPY_DST
+            usage: wgpu::BufferUsages::UNIFORM | wgpu::BufferUsages::COPY_DST
         });
 
         
         // Create pipeline
         let pipeline_lines = LinesPipeline::new(
             device, 
-            sc_desc, 
+            config, 
             &common_uniform_buffer
         );
 
         let pipeline_2d = TwoDPipeline::new(
-            device, 
-            sc_desc, 
+            device,
+            config,
             &common_uniform_buffer
         );
 
         let pipeline_text = TextPipeline::new(
             device,
-            sc_desc,
+            config,
         );
 
         Self {
@@ -79,24 +79,24 @@ impl PipelineManager {
         &mut self,
         device: &wgpu::Device,
         queue: &wgpu::Queue,
-        sc_desc: &wgpu::SwapChainDescriptor,
+        config: &wgpu::SurfaceConfiguration,
     ) {
         // Resize the pipelines
         self.pipeline_lines.resize(
             device,
-            sc_desc,
+            config,
         );
         self.pipeline_2d.resize(
             device,
-            sc_desc,
+            config,
         );
         self.pipeline_text.resize(
-            sc_desc,
+            config,
         );
 
         // Create an updated uniform buffer
         let common_uniform = CommonUniform{
-            screen_size: [sc_desc.width as f32, sc_desc.height as f32],
+            screen_size: [config.width as f32, config.height as f32],
         };
 
         // Write the uniform
@@ -148,7 +148,7 @@ impl PipelineManager {
         &mut self,
         device: &wgpu::Device,
         queue: &wgpu::Queue,
-        frame: &wgpu::SwapChainFrame,
+        frame_view: &wgpu::TextureView,
         start_instance: u32,
         end_instance: u32,
         load_op: wgpu::LoadOp<wgpu::Color>,
@@ -156,7 +156,7 @@ impl PipelineManager {
         self.pipeline_lines.render_instances(
             device,
             queue,
-            frame,
+            frame_view,
             start_instance,
             end_instance,
             load_op,
@@ -168,7 +168,7 @@ impl PipelineManager {
         &mut self,
         device: &wgpu::Device,
         queue: &wgpu::Queue,
-        frame: &wgpu::SwapChainFrame,
+        frame_view: &wgpu::TextureView,
         start_instance: u32,
         end_instance: u32,
         texture: Option<&Texture>,
@@ -177,7 +177,7 @@ impl PipelineManager {
         self.pipeline_2d.render_instances(
             device,
             queue,
-            frame,
+            frame_view,
             start_instance,
             end_instance,
             texture,
@@ -190,13 +190,13 @@ impl PipelineManager {
         &mut self,
         device: &wgpu::Device,
         queue: &wgpu::Queue,
-        frame: &wgpu::SwapChainFrame,
+        frame_view: &wgpu::TextureView,
         sections: &mut [Option<Section>],
     ) {
         self.pipeline_text.render_sections(
             device,
             queue,
-            frame,
+            frame_view,
             sections,
         );
     }

@@ -1,3 +1,5 @@
+use wgpu::{ColorTargetState, BlendState, BlendComponent, ColorWrites};
+
 use super::Texture;
 
 pub fn create_render_pass<'frame>(
@@ -104,7 +106,30 @@ pub fn create_instanced_pipeline(
         fragment: Some(wgpu::FragmentState {
             module: shader,
             entry_point: "fs_main",
-            targets: &[config.format.into()],
+            targets: &[ColorTargetState{
+                format: config.format,
+                blend: Some(BlendState{
+                    color: BlendComponent{
+                        src_factor: wgpu::BlendFactor::SrcAlpha,
+                        dst_factor: wgpu::BlendFactor::OneMinusSrcAlpha,
+                        operation: wgpu::BlendOperation::Add,
+                    },
+                    
+                    // {  R ,   G,   B,   A  }
+                    // {1.0 , 1.0, 1.0, 0.5  } src
+                    // {1.0 , 1.0, 1.0, 0.4  } dst
+
+                    // {1.0 , 1.0, 1.0, 0.9  } src
+                    
+
+                    alpha: BlendComponent{
+                        src_factor: wgpu::BlendFactor::SrcAlpha,
+                        dst_factor: wgpu::BlendFactor::DstAlpha,
+                        operation: wgpu::BlendOperation::Max,
+                    }
+                }),
+                write_mask: ColorWrites::ALL,
+            }],
         }),
         primitive: wgpu::PrimitiveState {
             topology: wgpu::PrimitiveTopology::TriangleStrip,

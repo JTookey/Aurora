@@ -48,7 +48,7 @@ pub struct TwoDInstance {
     pub size: [f32;2],          // 8
     pub colour: [f32;4],        // 16
     pub texture: [f32;4],       // 16 TL & BR
-    pub texture_opacity: f32,   // 4
+    pub opacity: f32,   // 4
     pub line_width: f32,        // 4
     pub corner_radius: f32,     // 4
     pub rotation: f32,          // 4

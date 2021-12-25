@@ -67,13 +67,28 @@ impl BaseApp for Rectangles {
         // Draw a rectangle
         renderer.add(RenderCommand::Draw2D(TwoDDescription{
             position: Point2::new(100.0,100.0),
-            size: Vector2::new(200.0,200.0),
+            size: Vector2::new(150.0,150.0),
             colour: Colour{
                 r: 1.0,
                 g: 1.0,
                 b: 0.0,
                 a: 1.0,
             },
+            opacity: 0.5,
+            .. TwoDDescription::default()
+        }));
+
+        // Draw a rectangle
+        renderer.add(RenderCommand::Draw2D(TwoDDescription{
+            position: Point2::new(150.0,150.0),
+            size: Vector2::new(150.0,150.0),
+            colour: Colour{
+                r: 0.0,
+                g: 1.0,
+                b: 1.0,
+                a: 1.0,
+            },
+            opacity: 0.5,
             .. TwoDDescription::default()
         }));
 
@@ -82,7 +97,6 @@ impl BaseApp for Rectangles {
             position: Point2::new(400.0,100.0),
             size: Vector2::new(200.0,200.0),
             texture: Some(self.squares_texture),
-            texture_opacity: 1.0,
             corner_radius: 0.2,
             .. TwoDDescription::default()
         }));
@@ -92,7 +106,6 @@ impl BaseApp for Rectangles {
             position: Point2::new(700.0,100.0),
             size: Vector2::new(200.0,200.0),
             texture: Some(self.bricks_texture),
-            texture_opacity: 1.0,
             rotation: self.rotation,
             .. TwoDDescription::default()
         }));

@@ -87,7 +87,7 @@ impl <'frame, 'cmd, 'sm> CommandProcessor<'frame, 'cmd,'sm> {
                         desc.colour.a as f32
                         ],
                     texture: texture_coords.unwrap_or( [0.0,0.0,0.0,0.0] ),
-                    texture_opacity: desc.texture_opacity,
+                    opacity: desc.opacity,
                     line_width: desc.line_width,   
                     corner_radius: desc.corner_radius,
                     rotation: desc.rotation,     

@@ -6,7 +6,7 @@ struct VertexOutput {
     [[location(3)]]         corner_radius: f32;
     [[location(4)]]         col: vec4<f32>;
     [[location(5)]]         tex_coord: vec2<f32>;
-    [[location(6)]]         tex_opacity: f32;
+    [[location(6)]]         opacity: f32;
 };
 
 struct Locals {
@@ -45,7 +45,7 @@ fn vs_main (
     [[location(5)]]             size: vec2<f32>,
     [[location(6)]]             colour: vec4<f32>,
     [[location(7)]]             texture_coords: vec4<f32>,
-    [[location(8)]]             texture_opacity: f32,
+    [[location(8)]]             opacity: f32,
     [[location(9)]]             line_width: f32,
     [[location(10)]]            corner_radius: f32,
     [[location(11)]]            rotation: f32,
@@ -58,7 +58,7 @@ fn vs_main (
     out.aspect_ratio = size.x / size.y;
     out.corner_radius = corner_radius;
     out.col = colour;
-    out.tex_opacity = texture_opacity;
+    out.opacity = opacity;
 
     // Set a defaults (just in case)
     out.uv  = vec2<f32>(0.0);
@@ -164,6 +164,7 @@ fn fs_main(
         d = asFilled(d);
     }
 
+    // Texture sampling must be before discard
     var tex = textureSample(t_Color, s_Color, in.tex_coord);
 
     // Transparency
@@ -171,6 +172,14 @@ fn fs_main(
         discard;
     }
 
+    var tint = mix(tex * d, in.col * d, in.col.a );
+
+    tint.a = tint.a * in.opacity;
+
+    if (tint.a<0.01) {
+        discard;
+    }
+
     // Texture
-    return mix(tex * d, in.col * d, in.col.a );
+    return tint;
 }

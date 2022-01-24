@@ -21,6 +21,10 @@ pub type WindowEvent<'a> = winit::event::WindowEvent<'a>;
 pub type KeyCode = winit::event::VirtualKeyCode;
 pub type KeyState = winit::event::ElementState;
 pub type MouseButton = winit::event::MouseButton;
+pub type LineBreaker = dyn wgpu_glyph::LineBreaker;
+pub type Layout = wgpu_glyph::Layout<LineBreaker>;
+pub type HorizontalAlign = wgpu_glyph::HorizontalAlign;
+pub type VerticalAlign = wgpu_glyph::VerticalAlign;
 
 // Handles
 pub type GeometryHandle = usize;

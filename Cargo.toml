@@ -1,6 +1,6 @@
 [package]
 name = "aurora"
-version = "0.0.15"
+version = "0.0.16"
 authors = ["James Tooke <j.w.tooke@gmail.com>"]
 edition = "2021"
 
@@ -10,8 +10,8 @@ edition = "2021"
 name = "aurora"
 path = "src/lib.rs"
 
-[build-dependencies]
-shaderc = "0.7.0"
+# [build-dependencies]
+# shaderc = "0.7.0"
 
 [dependencies]
 bytemuck = { version = "1.4.1", features = ["derive"] }

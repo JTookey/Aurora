@@ -1,6 +1,6 @@
 [package]
 name = "aurora"
-version = "0.0.16"
+version = "0.0.17"
 authors = ["James Tooke <j.w.tooke@gmail.com>"]
 edition = "2021"
 

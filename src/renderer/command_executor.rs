@@ -192,7 +192,8 @@ impl <'ce, 'frame: 'ce> CommandExecutor<'ce, 'frame> {
                         self.device, 
                         self.queue, 
                         self.frame_view, 
-                        self.section_manager.get_sections(*section_start, *section_end));
+                        self.section_manager.get_sections(*section_start, *section_end)
+                    );
                 }
 
                 _ => {},
